@@ -1,2 +1,2 @@
-# jira-git-report
-A Report generator combining Git commit with JIRA records
+# git-release-report
+It will list commits in git creating an enhanced release report
