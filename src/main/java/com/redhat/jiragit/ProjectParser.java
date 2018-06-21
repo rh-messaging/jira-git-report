@@ -44,6 +44,9 @@ public class ProjectParser {
             case "qpid-jms":
                qpidJMSProcess(arg[1], arg[2], arg[3], arg[4], Boolean.parseBoolean(arg[5]));
                break;
+            case "qpid-dispatch":
+               qpidDispatchProcess(arg[1], arg[2], arg[3], arg[4], Boolean.parseBoolean(arg[5]));
+               break;
             default:
                System.err.println("Invalid Argument: " + arg[0]);
                printSyntax();
@@ -58,7 +61,7 @@ public class ProjectParser {
 
    private static void printSyntax() {
       System.err.println("use Parser <project> <repository> <reportOutput> <from> <to> <rest : true|false>");
-      System.err.println("    valid projects: artemis, amq, wildfly, qpid-jms");
+      System.err.println("    valid projects: artemis, amq, wildfly, qpid-jms, qpid-dispatch");
    }
 
    private static void wildflyProcess(String clone, String output, String tag1, String tag2, boolean rest) throws Exception {
@@ -116,6 +119,25 @@ public class ProjectParser {
       parser.addJIRA(jiraParser);
 
       parser.addInterestingfolder("test").addInterestingfolder("docs/").addInterestingfolder("examples/");
+      File file = new File(output);
+      parser.parse(file,tag1, tag2);
+   }
+
+   private static void qpidDispatchProcess(String clone, String output, String tag1, String tag2, boolean rest) throws Exception {
+
+      JiraParser jiraParser = new JiraParser("QPID JIRAs");
+      jiraParser.setJira("DISPATCH-").setJiraBrowseURI("https://issues.apache.org/jira/browse/").
+         setSampleJQL("https://issues.apache.org/jira/issues/?jql=project%20%3D%20DISPATCH%20AND%20key%20in%20");
+
+      if (rest) {
+         jiraParser.setRestLocation("https://issues.apache.org/jira/rest/api/2/issue/");
+      }
+
+      GitParser parser = new GitParser(new File(clone), "https://github.com/apache/activemq-artemis/").
+         setSourceSuffix(".java", ".md", ".c", ".sh", ".groovy", ".py", ".h");
+      parser.addJIRA(jiraParser);
+
+      parser.addInterestingfolder("tests/").addInterestingfolder("doc/").addInterestingfolder("examples/");
       File file = new File(output);
       parser.parse(file,tag1, tag2);
    }
