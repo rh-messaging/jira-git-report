@@ -158,7 +158,7 @@ public class ProjectParser {
       parser.addJIRA(artemisJIRA);
 
       JiraParser entmqbrJIRA = new JiraParser("ENTMQBR");
-      entmqbrJIRA.setJira("ENTMQBR-").setJiraBrowseURI("https://issues.apache.org/jira/browse/").
+      entmqbrJIRA.setJira("ENTMQBR-").setJiraBrowseURI("https://issues.jboss.org/jira/browse/").
          setSampleJQL("https://issues.jboss.org/issues/?jql=project%20%3D%20ENTMQBR%20AND%20KEY%20IN");
 
       if (rest) {
