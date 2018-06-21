@@ -28,22 +28,25 @@ public class ProjectParser {
    public static void main(String arg[]) {
       try {
          if (arg.length != 6) {
-            System.err.println("use Parser <project> <repository> <reportOutput> <from> <to> <rest : true|false>");
-            System.err.println("    valid projects: artemis, amq, wildfly");
+            printSyntax();
             System.exit(-1);
          }
          switch (arg[0]) {
             case "artemis":
-               artemisProcess(arg);
+               artemisProcess(arg[1], arg[2], arg[3], arg[4], Boolean.parseBoolean(arg[5]));
                break;
             case "amq":
-               amqProcess(arg);
+               amqProcess(arg[1], arg[2], arg[3], arg[4], Boolean.parseBoolean(arg[5]));
                break;
             case "wildfly":
-               wildflyProcess(arg);
+               wildflyProcess(arg[1], arg[2], arg[3], arg[4], Boolean.parseBoolean(arg[5]));
+               break;
+            case "qpid-jms":
+               qpidJMSProcess(arg[1], arg[2], arg[3], arg[4], Boolean.parseBoolean(arg[5]));
                break;
             default:
                System.err.println("Invalid Argument: " + arg[0]);
+               printSyntax();
                System.exit(-1);
          }
 
@@ -53,23 +56,33 @@ public class ProjectParser {
       }
    }
 
+   private static void printSyntax() {
+      System.err.println("use Parser <project> <repository> <reportOutput> <from> <to> <rest : true|false>");
+      System.err.println("    valid projects: artemis, amq, wildfly, qpid-jms");
+   }
 
-   private static void wildflyProcess(String arg[]) throws Exception {
-      /* GitParser parser = new GitParser(new File(arg[1]), "WFLY-", "https://issues.jboss.org/browse/", "https://github.com/wildfly/wildfly/").
-         setSourceSuffix(".java", ".md", ".c", ".sh", ".groovy", ".adoc").
+   private static void wildflyProcess(String clone, String output, String tag1, String tag2, boolean rest) throws Exception {
+
+      JiraParser jiraParser = new JiraParser("WildFly JIRAs");
+      jiraParser.setJira("WFLY-").setJiraBrowseURI("https://issues.jboss.org/browse/").
          setSampleJQL("https://issues.jboss.org/issues/?jql=project%20%3D%20WildFly%20AND%20KEY%20IN");
+
+      if (rest) {
+         jiraParser.setRestLocation("https://issues.jboss.org/rest/api/2/issue/");
+      }
+
+      GitParser parser = new GitParser(new File(clone), "https://github.com/wildfly/wildfly/").
+         setSourceSuffix(".java", ".md", ".c", ".sh", ".groovy", ".adoc");
+      parser.addJIRA(jiraParser);
+
       parser.addInterestingfolder("test").addInterestingfolder("docs/");
+      File file = new File(output);
+      parser.parse(file,tag1, tag2);
 
-      File file = new File(arg[2]);
-
-      parser.setRestLocation("https://issues.jboss.org/rest/api/2/issue/");
-
-      parser.parse(file, arg[3], arg[4]); */
 
    }
 
-   private static void artemisProcess(String[] arg) throws Exception {
-      boolean rest = Boolean.parseBoolean(arg[5]);
+   private static void artemisProcess(String clone, String output, String tag1, String tag2, boolean rest) throws Exception {
 
       JiraParser jiraParser = new JiraParser("ARTEMIS JIRAs");
       jiraParser.setJira("ARTEMIS-").setJiraBrowseURI("https://issues.apache.org/jira/browse/").
@@ -79,20 +92,38 @@ public class ProjectParser {
          jiraParser.setRestLocation("https://issues.apache.org/jira/rest/api/2/issue/");
       }
 
-      GitParser parser = new GitParser(new File(arg[1]), "https://github.com/apache/activemq-artemis/").
+      GitParser parser = new GitParser(new File(clone), "https://github.com/apache/activemq-artemis/").
          setSourceSuffix(".java", ".md", ".c", ".sh", ".groovy");
       parser.addJIRA(jiraParser);
 
       parser.addInterestingfolder("test").addInterestingfolder("docs/").addInterestingfolder("examples/");
-      File file = new File(arg[2]);
-      parser.parse(file, arg[3], arg[4]);
+      File file = new File(output);
+      parser.parse(file,tag1, tag2);
    }
 
-   private static void amqProcess(String[] arg) throws Exception {
-      boolean rest = Boolean.parseBoolean(arg[5]);
+   private static void qpidJMSProcess(String clone, String output, String tag1, String tag2, boolean rest) throws Exception {
+
+      JiraParser jiraParser = new JiraParser("QPID JIRAs");
+      jiraParser.setJira("QPIDJMS-").setJiraBrowseURI("https://issues.apache.org/jira/browse/").
+         setSampleJQL("https://issues.apache.org/jira/issues/?jql=project%20%3D%20QPIDJMS%20AND%20key%20in%20");
+
+      if (rest) {
+         jiraParser.setRestLocation("https://issues.apache.org/jira/rest/api/2/issue/");
+      }
+
+      GitParser parser = new GitParser(new File(clone), "https://github.com/apache/activemq-artemis/").
+         setSourceSuffix(".java", ".md", ".c", ".sh", ".groovy");
+      parser.addJIRA(jiraParser);
+
+      parser.addInterestingfolder("test").addInterestingfolder("docs/").addInterestingfolder("examples/");
+      File file = new File(output);
+      parser.parse(file,tag1, tag2);
+   }
+
+   private static void amqProcess(String clone, String output, String tag1, String tag2, boolean rest) throws Exception {
 
 
-      GitParser parser = new GitParser(new File(arg[1]), "https://github.com/apache/activemq-artemis/").
+      GitParser parser = new GitParser(new File(clone), "https://github.com/apache/activemq-artemis/").
          setSourceSuffix(".java", ".md", ".c", ".sh", ".groovy");
 
       JiraParser artemisJIRA = new JiraParser("ARTEMIS");
@@ -115,7 +146,7 @@ public class ProjectParser {
       parser.addJIRA(entmqbrJIRA);
 
       parser.addInterestingfolder("test").addInterestingfolder("docs/").addInterestingfolder("examples/");
-      File file = new File(arg[2]);
-      parser.parse(file, arg[3], arg[4]);
+      File file = new File(output);
+      parser.parse(file,tag1, tag2);
    }
 }
