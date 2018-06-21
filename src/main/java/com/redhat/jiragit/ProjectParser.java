@@ -114,7 +114,7 @@ public class ProjectParser {
          jiraParser.setRestLocation("https://issues.apache.org/jira/rest/api/2/issue/");
       }
 
-      GitParser parser = new GitParser(new File(clone), "https://github.com/apache/activemq-artemis/").
+      GitParser parser = new GitParser(new File(clone), "https://github.com/apache/qpid-jms/").
          setSourceSuffix(".java", ".md", ".c", ".sh", ".groovy");
       parser.addJIRA(jiraParser);
 
@@ -133,11 +133,11 @@ public class ProjectParser {
          jiraParser.setRestLocation("https://issues.apache.org/jira/rest/api/2/issue/");
       }
 
-      GitParser parser = new GitParser(new File(clone), "https://github.com/apache/activemq-artemis/").
+      GitParser parser = new GitParser(new File(clone), "https://github.com/apache/qpid-dispatch/").
          setSourceSuffix(".java", ".md", ".c", ".sh", ".groovy", ".py", ".h");
       parser.addJIRA(jiraParser);
 
-      parser.addInterestingfolder("tests/").addInterestingfolder("doc/").addInterestingfolder("examples/");
+      parser.addInterestingfolder("tests/").addInterestingfolder("doc/");
       File file = new File(output);
       parser.parse(file,tag1, tag2);
    }
