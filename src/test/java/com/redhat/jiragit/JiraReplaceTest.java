@@ -20,6 +20,7 @@ package com.redhat.jiragit;
 import java.io.File;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -28,9 +29,19 @@ import org.junit.Test;
 
 public class JiraReplaceTest {
 
+   JiraParser jiraParser;
+
+
+   @Before
+   public void init() {
+      jiraParser = new JiraParser("Artemis");
+      jiraParser.setJira("ARTEMIS-").setJiraBrowseURI("https://issues.apache.org/jira/browse/").
+         setSampleJQL("https://issues.apache.org/jira/issues/?jql=project%20%3D%20ARTEMIS%20AND%20key%20in%20");
+   }
+
    @Test
    public void jiraReplaceMultiple() throws Exception {
-      String[] jiras = GitParser.extractJIRAs("ARTEMIS-", "[ARTEMIS-110] [ARTEMIS-1264]");
+      String[] jiras = jiraParser.extractJIRAs("[ARTEMIS-110] [ARTEMIS-1264]");
 
       Assert.assertEquals(2, jiras.length);
       Assert.assertEquals("ARTEMIS-110", jiras[0]);
@@ -39,16 +50,8 @@ public class JiraReplaceTest {
 
    @Test
    public void replaceSimple() {
-      String jiras[] = GitParser.extractJIRAs("ARTEMIS-", "ARTEMIS-1537 broker was less strict while reloading configuration");
+      String jiras[] = jiraParser.extractJIRAs("ARTEMIS-1537 broker was less strict while reloading configuration");
       Assert.assertEquals(1, jiras.length);
       Assert.assertEquals("ARTEMIS-1537", jiras[0]);
-   }
-
-   @Test
-   public void replaceURI() {
-      GitParser parser = new GitParser(new File("../"),"ARTEMIS-", "https://issues.apache.org/jira/browse/", "https://github.com/apache/activemq-artemis/").
-         setSourceSuffix(".java");
-      String output = parser.prettyCommitMessage("ARTEMIS-123");
-      Assert.assertEquals("<a href='" + parser.getJiraBrowseURI() + "ARTEMIS-123'>ARTEMIS-123</a>", output);
    }
 }

@@ -269,7 +269,8 @@ public class GitParser {
                   EditList edits = hunk.toEditList();
                   Iterator<Edit> editsIterator = edits.iterator();
 
-                  if (!interested && path.endsWith(".java")) {
+                  if (!interested && isSource(path)) {
+
 
                      while (editsIterator.hasNext()) {
                         Edit edit = editsIterator.next();
