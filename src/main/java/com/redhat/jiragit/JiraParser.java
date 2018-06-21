@@ -33,6 +33,8 @@ import static com.redhat.jiragit.LinkUtility.makeALink;
 
 public class JiraParser {
 
+   private final String title;
+
    String jira;
    String jiraBrowseURI;
 
@@ -49,7 +51,12 @@ public class JiraParser {
 
    final HashSet<String> totalJiras = new HashSet<>();
 
-   public JiraParser() {
+   public JiraParser(String title) {
+      this.title = title;
+   }
+
+   public String getTitle() {
+      return title;
    }
 
    public String getJira() {
@@ -88,8 +95,11 @@ public class JiraParser {
       return this;
    }
 
+   public void scanJIRAS(String fullMessage) {
+      currentJiras = extractJIRAs(fullMessage);
+   }
+
    public String prettyCommitMessage(String message) {
-      currentJiras = extractJIRAs(message);
       for (int i = 0; i < currentJiras.length; i++) {
          totalJiras.add(currentJiras[i]);
          message = message.replace(currentJiras[i], makeALink(currentJiras[i], jiraBrowseURI + currentJiras[i]));
@@ -115,13 +125,18 @@ public class JiraParser {
                String status = getField(object, "status");
                String resolution = getField(object, "resolution");
                String priority = getField(object, "priority");
-               bufferJIRA.append(makeALink(priority + "/" + issuetype + "/" + resolution + "/" + status, jiraBrowseURI + jiraIteration));
+
+               // if you make changes here, be careful with the closing paragraph at the end
+               bufferJIRA.append("<p>" + makeALink(priority + "/" + issuetype + "/" + resolution + "/" + status + " (" + jiraIteration + ")", jiraBrowseURI + jiraIteration));
             } else {
                bufferJIRA.append(makeALink(jiraIteration, jiraBrowseURI + jiraIteration));
             }
 
             if (i < currentJiras.length -1) {
-               bufferJIRA.append(",");
+               // jira is opening a paragraph
+               bufferJIRA.append(",</p>");
+            } else {
+               bufferJIRA.append("</p>");
             }
          }
       }
@@ -203,7 +218,7 @@ public class JiraParser {
          } while (jiraIterator.hasNext());
 
          output.print(bufferJiras.toString());
-         output.println(")'>" + totalJiras.size() + " JIRAS on this Report</a></h2>");
+         output.println(")'>" + totalJiras.size() + " JIRAS on " + title + "</a></h2>");
       }
 
    }

@@ -34,8 +34,10 @@ public class ProjectParser {
          }
          switch (arg[0]) {
             case "artemis":
-            case "amq":
                artemisProcess(arg);
+               break;
+            case "amq":
+               amqProcess(arg);
                break;
             case "wildfly":
                wildflyProcess(arg);
@@ -69,7 +71,7 @@ public class ProjectParser {
    private static void artemisProcess(String[] arg) throws Exception {
       boolean rest = Boolean.parseBoolean(arg[5]);
 
-      JiraParser jiraParser = new JiraParser();
+      JiraParser jiraParser = new JiraParser("ARTEMIS JIRAs");
       jiraParser.setJira("ARTEMIS-").setJiraBrowseURI("https://issues.apache.org/jira/browse/").
          setSampleJQL("https://issues.apache.org/jira/issues/?jql=project%20%3D%20ARTEMIS%20AND%20key%20in%20");
 
@@ -79,7 +81,38 @@ public class ProjectParser {
 
       GitParser parser = new GitParser(new File(arg[1]), "https://github.com/apache/activemq-artemis/").
          setSourceSuffix(".java", ".md", ".c", ".sh", ".groovy");
-      parser.setJiraPaser(jiraParser);
+      parser.addJIRA(jiraParser);
+
+      parser.addInterestingfolder("test").addInterestingfolder("docs/").addInterestingfolder("examples/");
+      File file = new File(arg[2]);
+      parser.parse(file, arg[3], arg[4]);
+   }
+
+   private static void amqProcess(String[] arg) throws Exception {
+      boolean rest = Boolean.parseBoolean(arg[5]);
+
+
+      GitParser parser = new GitParser(new File(arg[1]), "https://github.com/apache/activemq-artemis/").
+         setSourceSuffix(".java", ".md", ".c", ".sh", ".groovy");
+
+      JiraParser artemisJIRA = new JiraParser("ARTEMIS");
+      artemisJIRA.setJira("ARTEMIS-").setJiraBrowseURI("https://issues.apache.org/jira/browse/").
+         setSampleJQL("https://issues.apache.org/jira/issues/?jql=project%20%3D%20ARTEMIS%20AND%20key%20in%20");
+
+      if (rest) {
+         artemisJIRA.setRestLocation("https://issues.apache.org/jira/rest/api/2/issue/");
+      }
+      parser.addJIRA(artemisJIRA);
+
+      JiraParser entmqbrJIRA = new JiraParser("ENTMQBR");
+      entmqbrJIRA.setJira("ENTMQBR-").setJiraBrowseURI("https://issues.apache.org/jira/browse/").
+         setSampleJQL("https://issues.jboss.org/issues/?jql=project%20%3D%20ENTMQBR%20AND%20KEY%20IN");
+
+      if (rest) {
+         entmqbrJIRA.setRestLocation("https://issues.jboss.org/rest/api/2/issue/");
+      }
+
+      parser.addJIRA(entmqbrJIRA);
 
       parser.addInterestingfolder("test").addInterestingfolder("docs/").addInterestingfolder("examples/");
       File file = new File(arg[2]);

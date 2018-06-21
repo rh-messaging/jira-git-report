@@ -63,10 +63,10 @@ public class GitParser {
 
    final File folder;
 
-   JiraParser jiraParser;
+   ArrayList<JiraParser> jiras = new ArrayList();
 
-   public void setJiraPaser(JiraParser jiraParser) {
-      this.jiraParser = jiraParser;
+   public void addJIRA(JiraParser jiraParser) {
+      jiras.add(jiraParser);
    }
 
 
@@ -171,7 +171,11 @@ public class GitParser {
 
       StringBuffer interestingChanges[] = new StringBuffer[interestingFolder.size()];
 
-      output.print("<thead><tr><th>#</th><th>Commit</th><th>Date</th><th>Author</th><th>Short Message</th><th>Jira Status</th><th>Add</th><th>Rep</th><th>Del</th><th>Tot</th>");
+      output.print("<thead><tr><th>#</th><th>Commit</th><th>Date</th><th>Author</th><th>Short Message</th>");
+      for (JiraParser jira : jiras) {
+         output.print("<th>" + jira.getTitle() + "</th>");
+      }
+      output.print("<th>Add</th><th>Rep</th><th>Del</th><th>Tot</th>");
 
       for (int i = 0; i < interestingFolder.size(); i++) {
          output.print("<th>" + interestingFolder.get(i) + "</th>");
@@ -198,10 +202,12 @@ public class GitParser {
          output.print("<td>" + commitCell(commit) + " </td>");
          output.print("<td>" + dateFormat.format(commit.getAuthorIdent().getWhen()) + "</td>");
          output.print("<td>" + commit.getAuthorIdent().getName() + "</td>");
-         output.print("<td>" + jiraParser.prettyCommitMessage(commit.getShortMessage()) + "</td>");
+         output.print("<td>" + prettyCommitMessage(commit.getShortMessage(), commit.getFullMessage()) + "</td>");
 
          StringBuffer bufferJIRA = new StringBuffer();
-         output.println("<td>" + jiraParser.getJIRAStatus() + "</td>");
+         for (JiraParser jiraParser : jiras) {
+            output.println("<td>" + jiraParser.getJIRAStatus() + "</td>");
+         }
 
          oldTreeIter.reset(reader, commit.getParent(0).getTree());
          newTreeIter.reset(reader, commit.getTree());
@@ -297,12 +303,21 @@ public class GitParser {
 
       output.println("</tbody></table>");
 
-      jiraParser.generateSQL(output);
+      for (JiraParser jiraParser: jiras) {
+         jiraParser.generateSQL(output);
+      }
 
-      output.println("<br>Generated with <a href='https://github.com/clebertsuconic/git-release-report'> git-release-report</a>");
-
+      output.println("<br>Generated with <a href='https://github.com/rh-messaging/jira-git-report'> jira-git-report</a>");
       output.println("</body></html>");
 
+   }
+
+   private String prettyCommitMessage(String message, String fullMessage) {
+      for (JiraParser jiraParser : jiras) {
+         jiraParser.scanJIRAS(fullMessage);
+         message = jiraParser.prettyCommitMessage(message);
+      }
+      return message;
    }
 
    private boolean isSource(String path) {
