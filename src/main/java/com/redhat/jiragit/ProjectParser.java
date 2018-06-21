@@ -53,7 +53,7 @@ public class ProjectParser {
 
 
    private static void wildflyProcess(String arg[]) throws Exception {
-      GitParser parser = new GitParser(new File(arg[1]), "WFLY-", "https://issues.jboss.org/browse/", "https://github.com/wildfly/wildfly/").
+      /* GitParser parser = new GitParser(new File(arg[1]), "WFLY-", "https://issues.jboss.org/browse/", "https://github.com/wildfly/wildfly/").
          setSourceSuffix(".java", ".md", ".c", ".sh", ".groovy", ".adoc").
          setSampleJQL("https://issues.jboss.org/issues/?jql=project%20%3D%20WildFly%20AND%20KEY%20IN");
       parser.addInterestingfolder("test").addInterestingfolder("docs/");
@@ -62,20 +62,24 @@ public class ProjectParser {
 
       parser.setRestLocation("https://issues.jboss.org/rest/api/2/issue/");
 
-      parser.parse(file, arg[3], arg[4]);
+      parser.parse(file, arg[3], arg[4]); */
 
    }
 
    private static void artemisProcess(String[] arg) throws Exception {
       boolean rest = Boolean.parseBoolean(arg[5]);
 
-      GitParser parser = new GitParser(new File(arg[1]), "ARTEMIS-", "https://issues.apache.org/jira/browse/", "https://github.com/apache/activemq-artemis/").
-         setSourceSuffix(".java", ".md", ".c", ".sh", ".groovy").
+      JiraParser jiraParser = new JiraParser();
+      jiraParser.setJira("ARTEMIS-").setJiraBrowseURI("https://issues.apache.org/jira/browse/").
          setSampleJQL("https://issues.apache.org/jira/issues/?jql=project%20%3D%20ARTEMIS%20AND%20key%20in%20");
 
       if (rest) {
-         parser.setRestLocation("https://issues.apache.org/jira/rest/api/2/issue/");
+         jiraParser.setRestLocation("https://issues.apache.org/jira/rest/api/2/issue/");
       }
+
+      GitParser parser = new GitParser(new File(arg[1]), "https://github.com/apache/activemq-artemis/").
+         setSourceSuffix(".java", ".md", ".c", ".sh", ".groovy");
+      parser.setJiraPaser(jiraParser);
 
       parser.addInterestingfolder("test").addInterestingfolder("docs/").addInterestingfolder("examples/");
       File file = new File(arg[2]);

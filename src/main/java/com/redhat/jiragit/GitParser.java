@@ -17,8 +17,6 @@
 
 package com.redhat.jiragit;
 
-import javax.json.Json;
-import javax.json.JsonObject;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,11 +24,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -52,6 +48,7 @@ import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
 
+import static com.redhat.jiragit.LinkUtility.makeALink;
 /**
  * @author Clebert Suconic
  */
@@ -59,42 +56,27 @@ import org.eclipse.jgit.util.io.DisabledOutputStream;
 public class GitParser {
 
    final List<String> interestingFolder = new ArrayList<>();
-   final File folder;
-   final String jira;
-   final String jiraBrowseURI;
-   final String githubURI;
-   String restLocation;
+
    String[] sourceSuffix;
-   // JQL used to list all JIRAs here
-   String sampleJQL;
-   String[] currentJiras;
 
-   final HashSet<String> totalJiras = new HashSet<>();
+   final String githubURI;
 
-   public GitParser(File folder, String jira, String jiraBrowseURI, String githubURI) {
+   final File folder;
+
+   JiraParser jiraParser;
+
+   public void setJiraPaser(JiraParser jiraParser) {
+      this.jiraParser = jiraParser;
+   }
+
+
+   public GitParser(File folder,String githubURI) {
       this.folder = folder;
-      this.jira = jira;
-      this.jiraBrowseURI = jiraBrowseURI;
       this.githubURI = githubURI;
    }
 
    public GitParser addInterestingfolder(String folder) {
       interestingFolder.add(folder);
-      return this;
-   }
-
-   public String getSampleJQL() {
-      return sampleJQL;
-   }
-
-   /**
-    * A JQL used to list all JIRAs
-    * Example: https://issues.apache.org/jira/issues/?jql=project%20%3D%20ARTEMIS%20AND%20key%20in%20
-    *
-    * GitParser will add (JIRA1, JIRA2... JIRAN) to your list
-    */
-   public GitParser setSampleJQL(String sampleJQL) {
-      this.sampleJQL = sampleJQL;
       return this;
    }
 
@@ -107,53 +89,10 @@ public class GitParser {
       return this;
    }
 
-   public String getRestLocation() {
-      return restLocation;
-   }
-
-   public GitParser setRestLocation(String restLocation) {
-      this.restLocation = restLocation;
-      return this;
-   }
-
-   private String makeALink(String text, String uri) {
-      return "<a href='" + uri + "'>" + text + "</a>";
-   }
-
    private String commitCell(RevCommit commit) {
       String text = commit.getId().getName().substring(0, 7);
 
       return makeALink(text, githubURI + "commit/" + commit.getName());
-   }
-
-   public static String[] extractJIRAs(String jira, String message) {
-      HashSet list = new HashSet(1);
-      for (int jiraIndex = message.indexOf(jira); jiraIndex >= 0; jiraIndex = message.indexOf(jira, jiraIndex)) {
-         StringBuffer jiraID = new StringBuffer(jira);
-
-         for (int i = jiraIndex + jira.length(); i < message.length(); i++) {
-            char charAt = message.charAt(i);
-            if (charAt >= '0' && charAt <= '9') {
-               jiraID.append(charAt);
-            } else {
-               break;
-            }
-         }
-         list.add(jiraID.toString());
-         jiraIndex++;
-      }
-
-      return (String[]) list.toArray(new String[list.size()]);
-   }
-
-   public String prettyCommitMessage(String message) {
-      currentJiras = extractJIRAs(jira, message);
-      for (int i = 0; i < currentJiras.length; i++) {
-         totalJiras.add(currentJiras[i]);
-         message = message.replace(currentJiras[i], makeALink(currentJiras[i], jiraBrowseURI + currentJiras[i]));
-      }
-
-      return message;
    }
 
    private void copy(InputStream is, OutputStream os) throws IOException {
@@ -174,41 +113,7 @@ public class GitParser {
       return new String(out.toByteArray());
    }
 
-   JsonObject lastJIRAObject;
-   String lastJIRA;
-
-   private JsonObject restJIRA(String JIRA) throws Exception {
-
-      System.out.println("Inspecting " + JIRA);
-      if (lastJIRA != null && lastJIRA.equals(JIRA)) {
-         return lastJIRAObject;
-      }
-      if (restLocation != null) {
-         try {
-            URL url = new URL(restLocation + JIRA);
-            InputStream stream = url.openStream();
-
-            lastJIRA = JIRA;
-            lastJIRAObject = Json.createReader(stream).readObject();
-         } catch (Throwable e) {
-            e.printStackTrace();
-            lastJIRAObject = null;
-            lastJIRA = null;
-         }
-         return lastJIRAObject;
-      }
-      return null;
-   }
-
-   private String getField(JsonObject object, String name) {
-
-      try {
-         return object.getJsonObject("fields").getJsonObject(name).getString("name");
-      } catch (Throwable e) {
-         return " ";
-      }
-   }
-   private void copy(String name, File directory) throws Exception {
+  private void copy(String name, File directory) throws Exception {
       directory.mkdirs();
       InputStream stream = this.getClass().getResourceAsStream(name);
       File file = new File(directory, name);
@@ -293,35 +198,10 @@ public class GitParser {
          output.print("<td>" + commitCell(commit) + " </td>");
          output.print("<td>" + dateFormat.format(commit.getAuthorIdent().getWhen()) + "</td>");
          output.print("<td>" + commit.getAuthorIdent().getName() + "</td>");
-         output.print("<td>" + prettyCommitMessage(commit.getShortMessage()) + "</td>");
+         output.print("<td>" + jiraParser.prettyCommitMessage(commit.getShortMessage()) + "</td>");
 
          StringBuffer bufferJIRA = new StringBuffer();
-         if (currentJiras != null) {
-            for (int i = 0; i < currentJiras.length; i++) {
-
-               String jiraIteration = currentJiras[i];
-               JsonObject object = null;
-               if (restLocation != null) {
-                  object = restJIRA(jiraIteration);
-               }
-               // it could happen the object is returning null for security or something else
-               if (object != null) {
-                  String issuetype = getField(object, "issuetype");
-                  String status = getField(object, "status");
-                  String resolution = getField(object, "resolution");
-                  String priority = getField(object, "priority");
-                  bufferJIRA.append(makeALink(priority + "/" + issuetype + "/" + resolution + "/" + status, jiraBrowseURI + jiraIteration));
-               } else {
-                  bufferJIRA.append(makeALink(jiraIteration, jiraBrowseURI + jiraIteration));
-               }
-
-               if (i < currentJiras.length -1) {
-                  bufferJIRA.append(",");
-               }
-            }
-
-         }
-         output.println("<td>" + bufferJIRA.toString() + "</td>");
+         output.println("<td>" + jiraParser.getJIRAStatus() + "</td>");
 
          oldTreeIter.reset(reader, commit.getParent(0).getTree());
          newTreeIter.reset(reader, commit.getTree());
@@ -417,23 +297,7 @@ public class GitParser {
 
       output.println("</tbody></table>");
 
-      if (sampleJQL != null && !totalJiras.isEmpty()) {
-         output.println("<br><h2>");
-         output.print("<a href='" + sampleJQL + "(");
-
-         Iterator<String> jiraIterator = totalJiras.iterator();
-         StringBuffer bufferJiras = new StringBuffer();
-
-         do {
-            bufferJiras.append(jiraIterator.next());
-            if (jiraIterator.hasNext()) {
-               bufferJiras.append("%2C");
-            }
-         } while (jiraIterator.hasNext());
-
-         output.print(bufferJiras.toString());
-         output.println(")'>" + totalJiras.size() + " JIRAS on this Report</a></h2>");
-      }
+      jiraParser.generateSQL(output);
 
       output.println("<br>Generated with <a href='https://github.com/clebertsuconic/git-release-report'> git-release-report</a>");
 
@@ -458,20 +322,8 @@ public class GitParser {
       return folder;
    }
 
-   public String getJira() {
-      return jira;
-   }
-
-   public String getJiraBrowseURI() {
-      return jiraBrowseURI;
-   }
-
    public String getGithubURI() {
       return githubURI;
-   }
-
-   public HashSet<String> getTotalJiras() {
-      return totalJiras;
    }
 
    private static AbstractTreeIterator prepareTree(Git git, RevWalk walk, RevCommit commit) throws Exception {
