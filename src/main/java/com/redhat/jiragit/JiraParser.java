@@ -22,8 +22,10 @@ import javax.json.JsonObject;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 
 import static com.redhat.jiragit.LinkUtility.makeALink;
 

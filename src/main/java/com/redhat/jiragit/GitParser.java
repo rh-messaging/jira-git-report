@@ -55,6 +55,8 @@ import static com.redhat.jiragit.LinkUtility.makeALink;
 
 public class GitParser {
 
+   private List<BranchInfo> branches = new ArrayList<>();
+
    final List<String> interestingFolder = new ArrayList<>();
 
    String[] sourceSuffix;
@@ -89,6 +91,13 @@ public class GitParser {
       return this;
    }
 
+   public void addBranches(String[] branches) {
+      for (int i = 0; i < branches.length; i += 2) {
+         BranchInfo branchInfo = new BranchInfo(branches[i], branches[i + 1]);
+         this.branches.add(branchInfo);
+         System.out.println("Adding branch " + branchInfo);
+      }
+   }
    private String commitCell(RevCommit commit) {
       String text = commit.getId().getName().substring(0, 7);
 
@@ -120,6 +129,42 @@ public class GitParser {
       copy(stream, new FileOutputStream(file));
    }
 
+   private void parseBranches(Git git) throws Exception {
+
+      for (BranchInfo branchInfo : this.branches) {
+         RevWalk walk = new RevWalk(git.getRepository());
+         ObjectId fromID = git.getRepository().resolve(branchInfo.source);
+         ObjectId toID = git.getRepository().resolve(branchInfo.name);
+
+
+         RevCommit fromCommit = walk.parseCommit(fromID);
+         RevCommit toCommit = walk.parseCommit(toID);
+         walk.markUninteresting(fromCommit);
+         walk.markStart(toCommit);
+
+
+         walk.sort(RevSort.REVERSE, true);
+         walk.setRevFilter(RevFilter.NO_MERGES);
+         Iterator<RevCommit> commits = walk.iterator();
+         while (commits.hasNext()) {
+            RevCommit commit = commits.next();
+
+            String messages[] = commit.getFullMessage().split(" |\\(|\\)|\\[|\\]");
+
+            for (int j = 0; j < messages.length; j++) {
+               if (messages[j].equals("commit")) {
+                  if (j + 1 < messages.length) {
+                     branchInfo.addCherryPick(messages[j+1], commit.getName());
+                  }
+               }
+            }
+         }
+
+         walk.close();
+      }
+
+   }
+
    public void parse(File outputFile, String from, String to) throws Exception {
 
       PrintStream output = new PrintStream(new FileOutputStream(outputFile));
@@ -137,6 +182,8 @@ public class GitParser {
       copy("sort_desc.png", imageDirectory);
       Git git = Git.open(folder);
       RevWalk walk = new RevWalk(git.getRepository());
+
+      parseBranches(git);
 
       ObjectId fromID = git.getRepository().resolve(from); // ONE COMMIT BEFORE THE SELECTED AS WE NEED DIFFS
       ObjectId toID = git.getRepository().resolve(to);
@@ -171,7 +218,12 @@ public class GitParser {
 
       StringBuffer interestingChanges[] = new StringBuffer[interestingFolder.size()];
 
-      output.print("<thead><tr><th>#</th><th>Commit</th><th>Date</th><th>Author</th><th>Short Message</th>");
+      output.print("<thead><tr><th>#</th><th>Commit</th>");
+
+      if (!branches.isEmpty()) {
+         output.print("<th>XREF</th>");
+      }
+      output.print("<th>Date</th><th>Author</th><th>Short Message</th>");
       for (JiraParser jira : jiras) {
          output.print("<th>" + jira.getTitle() + "</th>");
       }
@@ -197,9 +249,22 @@ public class GitParser {
 
          numberOfCommits++;
 
+         StringBuffer cherryPickInfo = new StringBuffer();
+         for (BranchInfo branchInfo : branches) {
+            String pickedAt = branchInfo.getCommit(commit.getName());
+            if (pickedAt != null) {
+               cherryPickInfo.append(makeALink(branchInfo.name + "(" + pickedAt.substring(0, 7) + ")", githubURI + "commit/" + pickedAt));
+               cherryPickInfo.append(" ");
+            }
+         }
+
          output.print("<tr>");
          output.println("<td>" + makeALink(numberOfCommits + "", githubURI + "commit/" + commit.getName()) + "</td>");
-         output.print("<td>" + commitCell(commit) + " </td>");
+         output.print("<td>" + commitCell(commit) + "</td>");
+
+         if (!branches.isEmpty()) {
+            output.println("<td>" + cherryPickInfo.toString() + "</td>");
+         }
          output.print("<td>" + dateFormat.format(commit.getAuthorIdent().getWhen()) + "</td>");
          output.print("<td>" + commit.getAuthorIdent().getName() + "</td>");
          output.print("<td>" + prettyCommitMessage(commit.getShortMessage(), commit.getFullMessage()) + "</td>");

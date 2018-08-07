@@ -27,13 +27,21 @@ public class ProjectParser {
 
    public static void main(String arg[]) {
       try {
-         if (arg.length != 6) {
+         if (arg.length < 6) {
             printSyntax();
             System.exit(-1);
          }
+         String otherBranches[] = new String[0];
+         if (arg.length > 6) {
+            otherBranches = new String[arg.length - 6];
+            int c = 0;
+            for (int i = 6; i < arg.length; i++) {
+               otherBranches[c++] = arg[i];
+            }
+         }
          switch (arg[0]) {
             case "artemis":
-               artemisProcess(arg[1], arg[2], arg[3], arg[4], Boolean.parseBoolean(arg[5]));
+               artemisProcess(arg[1], arg[2], arg[3], arg[4], Boolean.parseBoolean(arg[5]), otherBranches);
                break;
             case "amq":
                amqProcess(arg[1], arg[2], arg[3], arg[4], Boolean.parseBoolean(arg[5]));
@@ -85,9 +93,15 @@ public class ProjectParser {
 
    }
 
-   private static void artemisProcess(String clone, String output, String tag1, String tag2, boolean rest) throws Exception {
+   private static void artemisProcess(String clone, String output, String tag1, String tag2, boolean rest, String[] otherBranches) throws Exception {
+
+      if (otherBranches.length % 2 != 0) {
+         System.out.println("Usage on other branches:... branch origin-on-that-branch....");
+         throw new Exception("Cannot handle parameters");
+      }
 
       JiraParser jiraParser = new JiraParser("ARTEMIS JIRAs");
+
       jiraParser.setJira("ARTEMIS-").setJiraBrowseURI("https://issues.apache.org/jira/browse/").
          setSampleJQL("https://issues.apache.org/jira/issues/?jql=project%20%3D%20ARTEMIS%20AND%20key%20in%20");
 
@@ -98,6 +112,8 @@ public class ProjectParser {
       GitParser parser = new GitParser(new File(clone), "https://github.com/apache/activemq-artemis/").
          setSourceSuffix(".java", ".md", ".c", ".sh", ".groovy");
       parser.addJIRA(jiraParser);
+
+      parser.addBranches(otherBranches);
 
       parser.addInterestingfolder("test").addInterestingfolder("docs/").addInterestingfolder("examples/");
       File file = new File(output);
