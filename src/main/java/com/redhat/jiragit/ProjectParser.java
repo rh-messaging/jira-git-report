@@ -38,22 +38,28 @@ public class ProjectParser {
             for (int i = 6; i < arg.length; i++) {
                otherBranches[c++] = arg[i];
             }
+
+
+            if (otherBranches.length % 2 != 0) {
+               System.out.println("Usage on other branches:... branch origin-on-that-branch....");
+               System.exit(-1);
+            }
          }
          switch (arg[0]) {
             case "artemis":
                artemisProcess(arg[1], arg[2], arg[3], arg[4], Boolean.parseBoolean(arg[5]), otherBranches);
                break;
             case "amq":
-               amqProcess(arg[1], arg[2], arg[3], arg[4], Boolean.parseBoolean(arg[5]));
+               amqProcess(arg[1], arg[2], arg[3], arg[4], Boolean.parseBoolean(arg[5]), otherBranches);
                break;
             case "wildfly":
-               wildflyProcess(arg[1], arg[2], arg[3], arg[4], Boolean.parseBoolean(arg[5]));
+               wildflyProcess(arg[1], arg[2], arg[3], arg[4], Boolean.parseBoolean(arg[5]), otherBranches);
                break;
             case "qpid-jms":
-               qpidJMSProcess(arg[1], arg[2], arg[3], arg[4], Boolean.parseBoolean(arg[5]));
+               qpidJMSProcess(arg[1], arg[2], arg[3], arg[4], Boolean.parseBoolean(arg[5]), otherBranches);
                break;
             case "qpid-dispatch":
-               qpidDispatchProcess(arg[1], arg[2], arg[3], arg[4], Boolean.parseBoolean(arg[5]));
+               qpidDispatchProcess(arg[1], arg[2], arg[3], arg[4], Boolean.parseBoolean(arg[5]), otherBranches);
                break;
             default:
                System.err.println("Invalid Argument: " + arg[0]);
@@ -68,11 +74,11 @@ public class ProjectParser {
    }
 
    private static void printSyntax() {
-      System.err.println("use Parser <project> <repository> <reportOutput> <from> <to> <rest : true|false>");
+      System.err.println("use Parser <project> <repository> <reportOutput> <from> <to> <rest : true|false> cherry-pick-branch1 cherry-pick-source1 cherry-pick-branch2 cherry-pick-source2...cherry-pickbranchN cherry-pick-sourceN");
       System.err.println("    valid projects: artemis, amq, wildfly, qpid-jms, qpid-dispatch");
    }
 
-   private static void wildflyProcess(String clone, String output, String tag1, String tag2, boolean rest) throws Exception {
+   private static void wildflyProcess(String clone, String output, String tag1, String tag2, boolean rest, String[] otherBranches) throws Exception {
 
       JiraParser jiraParser = new JiraParser("WildFly JIRAs");
       jiraParser.setJira("WFLY-").setJiraBrowseURI("https://issues.jboss.org/browse/").
@@ -95,10 +101,6 @@ public class ProjectParser {
 
    private static void artemisProcess(String clone, String output, String tag1, String tag2, boolean rest, String[] otherBranches) throws Exception {
 
-      if (otherBranches.length % 2 != 0) {
-         System.out.println("Usage on other branches:... branch origin-on-that-branch....");
-         throw new Exception("Cannot handle parameters");
-      }
 
       JiraParser jiraParser = new JiraParser("ARTEMIS JIRAs");
 
@@ -120,7 +122,7 @@ public class ProjectParser {
       parser.parse(file,tag1, tag2);
    }
 
-   private static void qpidJMSProcess(String clone, String output, String tag1, String tag2, boolean rest) throws Exception {
+   private static void qpidJMSProcess(String clone, String output, String tag1, String tag2, boolean rest, String[] otherBranches) throws Exception {
 
       JiraParser jiraParser = new JiraParser("QPID JIRAs");
       jiraParser.setJira("QPIDJMS-").setJiraBrowseURI("https://issues.apache.org/jira/browse/").
@@ -134,12 +136,14 @@ public class ProjectParser {
          setSourceSuffix(".java", ".md", ".c", ".sh", ".groovy");
       parser.addJIRA(jiraParser);
 
+      parser.addBranches(otherBranches);
+
       parser.addInterestingfolder("test").addInterestingfolder("docs/").addInterestingfolder("examples/");
       File file = new File(output);
       parser.parse(file,tag1, tag2);
    }
 
-   private static void qpidDispatchProcess(String clone, String output, String tag1, String tag2, boolean rest) throws Exception {
+   private static void qpidDispatchProcess(String clone, String output, String tag1, String tag2, boolean rest, String[] otherBranches) throws Exception {
 
       JiraParser jiraParser = new JiraParser("Dispatch JIRAs");
       jiraParser.setJira("DISPATCH-").setJiraBrowseURI("https://issues.apache.org/jira/browse/").
@@ -153,12 +157,14 @@ public class ProjectParser {
          setSourceSuffix(".java", ".md", ".c", ".sh", ".groovy", ".py", ".h");
       parser.addJIRA(jiraParser);
 
+      parser.addBranches(otherBranches);
+
       parser.addInterestingfolder("tests/").addInterestingfolder("doc/");
       File file = new File(output);
       parser.parse(file,tag1, tag2);
    }
 
-   private static void amqProcess(String clone, String output, String tag1, String tag2, boolean rest) throws Exception {
+   private static void amqProcess(String clone, String output, String tag1, String tag2, boolean rest, String[] otherBranches) throws Exception {
 
 
       GitParser parser = new GitParser(new File(clone), "https://github.com/apache/activemq-artemis/").
@@ -172,6 +178,8 @@ public class ProjectParser {
          artemisJIRA.setRestLocation("https://issues.apache.org/jira/rest/api/2/issue/");
       }
       parser.addJIRA(artemisJIRA);
+
+      parser.addBranches(otherBranches);
 
       JiraParser entmqbrJIRA = new JiraParser("ENTMQBR");
       entmqbrJIRA.setJira("ENTMQBR-").setJiraBrowseURI("https://issues.jboss.org/jira/browse/").
