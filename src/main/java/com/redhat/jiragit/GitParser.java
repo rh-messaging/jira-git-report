@@ -250,11 +250,23 @@ public class GitParser {
          numberOfCommits++;
 
          StringBuffer cherryPickInfo = new StringBuffer();
+         ArrayList<String> picks = new ArrayList<>();
          for (BranchInfo branchInfo : branches) {
             String pickedAt = branchInfo.getCommit(commit.getName());
             if (pickedAt != null) {
-               cherryPickInfo.append(makeALink(branchInfo.name + "(" + pickedAt.substring(0, 7) + ")", githubURI + "commit/" + pickedAt));
-               cherryPickInfo.append(" ");
+               picks.add(makeALink(branchInfo.name + "(" + pickedAt.substring(0, 7) + ")", githubURI + "commit/" + pickedAt));
+            }
+         }
+
+         // convert commas on cherry-pick list
+         {
+            boolean first = true;
+            for (String pick : picks) {
+               if (!first) {
+                  cherryPickInfo.append(",");
+               }
+               first = false;
+               cherryPickInfo.append(pick);
             }
          }
 
