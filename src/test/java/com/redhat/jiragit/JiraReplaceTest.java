@@ -18,6 +18,9 @@
 package com.redhat.jiragit;
 
 import java.io.File;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.HashSet;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -46,6 +49,31 @@ public class JiraReplaceTest {
       Assert.assertEquals(2, jiras.length);
       Assert.assertEquals("ARTEMIS-110", jiras[0]);
       Assert.assertEquals("ARTEMIS-1264", jiras[1]);
+   }
+
+   @Test
+   public void jiraUpstream() throws Exception {
+      jiraParser = new JiraParser("ENTMQBR");
+      jiraParser.setJira("ENTMQBR-").setJiraBrowseURI("https://issues.apache.org/jira/browse/").
+         setSampleJQL("https://issues.apache.org/jira/issues/?jql=project%20%3D%20ARTEMIS%20AND%20key%20in%20");
+
+      URL url = this.getClass().getClassLoader().getResource("upstream.jira");
+      File file = new File(url.getFile());
+
+      System.out.println("File::" + file);
+
+      Assert.assertTrue(file.exists());
+
+      jiraParser.setUpstream("ARTEMIS-", file);
+      String[] jiras = jiraParser.extractJIRAs("[ARTEMIS-5] ARTEMIS-6");
+
+      HashSet<String> jiraSet = new HashSet<>();
+      for (String v : jiras) jiraSet.add(v);
+
+      Assert.assertEquals(2, jiraSet.size());
+
+      Assert.assertTrue(jiraSet.contains("ENTMQBR-1"));
+      Assert.assertTrue(jiraSet.contains("ENTMQBR-2"));
    }
 
    @Test

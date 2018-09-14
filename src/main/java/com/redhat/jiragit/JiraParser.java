@@ -19,6 +19,8 @@ package com.redhat.jiragit;
 
 import javax.json.Json;
 import javax.json.JsonObject;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.URL;
@@ -26,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 
 import static com.redhat.jiragit.LinkUtility.makeALink;
 
@@ -50,6 +53,11 @@ public class JiraParser {
 
    JsonObject lastJIRAObject;
    String lastJIRA;
+
+
+   String upstreamJIRA;
+   File upstreamFile;
+   Properties upstreamList;
 
    final HashSet<String> totalJiras = new HashSet<>();
 
@@ -181,9 +189,31 @@ public class JiraParser {
    }
 
 
+   public void setUpstream(String upstreamJIRA, File upstreamFile) throws Exception {
+      this.upstreamJIRA = upstreamJIRA;
+      this.upstreamFile = upstreamFile;
+      this.upstreamList = new Properties();
+      upstreamList.load(new FileInputStream(upstreamFile));
+   }
+
 
    public String[] extractJIRAs(String message) {
-      HashSet list = new HashSet(1);
+      HashSet locallist = new HashSet(1);
+      extractJIRAs(message, jira, locallist);
+      if (upstreamJIRA != null) {
+         HashSet<String> upstreamLocalList = new HashSet();
+         extractJIRAs(message, upstreamJIRA, upstreamLocalList);
+         for (String upstreamItem : upstreamLocalList) {
+            String value = upstreamList.getProperty(upstreamItem);
+            if (value != null) {
+               locallist.add(value);
+            }
+         }
+      }
+      return (String[]) locallist.toArray(new String[locallist.size()]);
+   }
+
+   private void extractJIRAs(String message, String jira, HashSet list) {
       for (int jiraIndex = message.indexOf(jira); jiraIndex >= 0; jiraIndex = message.indexOf(jira, jiraIndex)) {
          StringBuffer jiraID = new StringBuffer(jira);
 
@@ -199,7 +229,6 @@ public class JiraParser {
          jiraIndex++;
       }
 
-      return (String[]) list.toArray(new String[list.size()]);
    }
 
 

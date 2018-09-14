@@ -185,6 +185,16 @@ public class ProjectParser {
       entmqbrJIRA.setJira("ENTMQBR-").setJiraBrowseURI("https://issues.jboss.org/jira/browse/").
          setSampleJQL("https://issues.jboss.org/issues/?jql=project%20%3D%20ENTMQBR%20AND%20KEY%20IN");
 
+
+      File upstream = new File("entmqbr.properties");
+
+      if (upstream.exists()) {
+         System.out.println("Upstream properties " + upstream + " found, tracking JIRAs upstream versus downstream");
+
+         entmqbrJIRA.setUpstream("ARTEMIS-", upstream);
+      }
+
+
       if (rest) {
          entmqbrJIRA.setRestLocation("https://issues.jboss.org/rest/api/2/issue/");
       }
