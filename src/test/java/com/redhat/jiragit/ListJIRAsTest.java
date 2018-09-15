@@ -17,10 +17,14 @@
 
 package com.redhat.jiragit;
 
-/**
- * @author Clebert Suconic
- */
+import org.junit.Test;
 
-public class ListJIRAs {
+public class ListJIRAsTest {
 
+   @Test
+   public void doList() throws Exception {
+      RestList list = new RestList().setJiraLookup("ARTEMIS-").setUrl("https://issues.jboss.org/rest/api/2/search?jql=project=%22ENTMQBR%22&fields=*all");
+
+      list.lookup();
+   }
 }

@@ -213,7 +213,7 @@ public class JiraParser {
       return (String[]) locallist.toArray(new String[locallist.size()]);
    }
 
-   private void extractJIRAs(String message, String jira, HashSet list) {
+   public static void extractJIRAs(String message, String jira, HashSet list) {
       for (int jiraIndex = message.indexOf(jira); jiraIndex >= 0; jiraIndex = message.indexOf(jira, jiraIndex)) {
          StringBuffer jiraID = new StringBuffer(jira);
 
