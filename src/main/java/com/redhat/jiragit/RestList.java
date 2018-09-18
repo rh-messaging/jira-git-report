@@ -29,13 +29,17 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.commons.codec.binary.Base64;
+
 public class RestList {
 
+   public String userPassProperty;
    public String jira;
    public String queryURL;
    public String baseURL;
@@ -48,6 +52,15 @@ public class RestList {
 
    public RestList setJiraLookup(String jira) {
       this.jira = jira;
+      return this;
+   }
+
+   public String getUserPassProperty() {
+      return userPassProperty;
+   }
+
+   public RestList setUserPassProperty(String userPassProperty) {
+      this.userPassProperty = userPassProperty;
       return this;
    }
 
@@ -69,6 +82,24 @@ public class RestList {
       return this;
    }
 
+   public InputStream openStream(URL url) throws Exception {
+      URLConnection urlConnection = url.openConnection();
+
+      // userPass should be user:password
+      String userPass = System.getProperty(userPassProperty);
+
+      if (userPass != null) {
+
+         System.out.println("Using user/pass " + userPass);
+         String authString = userPass;
+         String authStringEnc = new String(Base64.encodeBase64(userPass.getBytes()));
+         urlConnection.setRequestProperty("Authorization", "Basic " + authStringEnc);
+
+      }
+
+      return urlConnection.getInputStream();
+   }
+
    public void lookup() throws Exception {
       int start = 0;
       int total = 0;
@@ -77,9 +108,11 @@ public class RestList {
          System.out.println("Querying for JIRAs, starting at " + start);
          URL resturl = new URL(queryURL + "&startAt=" + start);
 
-         InputStream stream = resturl.openStream();
+         InputStream stream = openStream(resturl);
 
          JsonObject object = Json.createReader(stream).readObject();
+
+         stream.close();
 
          total = object.getInt("total");
          int maxResults = object.getInt("maxResults");
@@ -135,9 +168,9 @@ public class RestList {
 
    }
 
-   private void remoteQuery(String jirakey, String queryRemotes) throws IOException {
+   private void remoteQuery(String jirakey, String queryRemotes) throws Exception {
       URL urlRemote = new URL(queryRemotes);
-      InputStream inputStream = new BufferedInputStream(urlRemote.openStream());
+      InputStream inputStream = new BufferedInputStream(openStream(urlRemote));
 
       ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
 
@@ -162,5 +195,7 @@ public class RestList {
             mapJiras.put(jirakey, jiraFound);
          }
       }
+
+      inputStream.close();
    }
 }
