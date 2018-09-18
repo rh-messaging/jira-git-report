@@ -18,6 +18,9 @@
 package com.redhat.jiragit;
 
 import java.io.File;
+import java.io.PrintStream;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Clebert Suconic
@@ -195,6 +198,23 @@ public class ProjectParser {
          System.out.println("Upstream properties " + upstream + " found, tracking JIRAs upstream versus downstream");
 
          entmqbrJIRA.setUpstream("ARTEMIS-", upstream);
+      } else {
+
+         try {
+
+            RestList list = new RestList().setJiraLookup("ARTEMIS-").setQueryUrl("https://issues.jboss.org/rest/api/latest/search?jql=project=%22ENTMQBR%22&fields=*all&maxResults=100").setBaseURL("https://issues.jboss.org/rest/api/latest/issue/");
+            list.lookup();
+
+            PrintStream stream = new PrintStream(upstream);
+            Set<Map.Entry<String, String>> entries = list.mapJiras.entrySet();
+            for (Map.Entry<String, String> entry : entries) {
+               stream.println(entry.getValue() + "=" + entry.getKey());
+            }
+            stream.close();
+            entmqbrJIRA.setUpstream("ARTEMIS-", upstream);
+         } catch (Exception e) {
+            e.printStackTrace();
+         }
       }
 
 

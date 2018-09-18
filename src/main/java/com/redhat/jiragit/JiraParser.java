@@ -228,7 +228,6 @@ public class JiraParser {
          list.add(jiraID.toString());
          jiraIndex++;
       }
-
    }
 
 

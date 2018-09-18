@@ -17,14 +17,24 @@
 
 package com.redhat.jiragit;
 
+import java.util.Map;
+import java.util.Set;
+
 import org.junit.Test;
 
 public class ListJIRAsTest {
 
    @Test
    public void doList() throws Exception {
-      RestList list = new RestList().setJiraLookup("ARTEMIS-").setUrl("https://issues.jboss.org/rest/api/2/search?jql=project=%22ENTMQBR%22&fields=*all");
+      RestList list = new RestList().setJiraLookup("ARTEMIS-").setQueryUrl("https://issues.jboss.org/rest/api/latest/search?jql=project=%22ENTMQBR%22&fields=*all&maxResults=100").setBaseURL("https://issues.jboss.org/rest/api/latest/issue/");
 
       list.lookup();
+
+      Set<Map.Entry<String, String>> entries = list.mapJiras.entrySet();
+
+      System.out.println("Result::");
+      for (Map.Entry<String, String> entry : entries) {
+         System.out.println(entry.getKey() + "=" + entry.getValue());
+      }
    }
 }
