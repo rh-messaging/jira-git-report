@@ -90,7 +90,7 @@ public class RestList {
 
       if (userPass != null) {
 
-         System.out.println("Using user/pass " + userPass);
+         System.out.println("Using user/pass");
          String authString = userPass;
          String authStringEnc = new String(Base64.encodeBase64(userPass.getBytes()));
          urlConnection.setRequestProperty("Authorization", "Basic " + authStringEnc);
