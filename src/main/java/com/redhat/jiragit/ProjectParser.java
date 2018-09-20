@@ -196,7 +196,6 @@ public class ProjectParser {
 
       if (upstream.exists()) {
          System.out.println("Upstream properties " + upstream + " found, tracking JIRAs upstream versus downstream");
-
          entmqbrJIRA.setUpstream("ARTEMIS-", upstream);
       } else {
 
@@ -206,9 +205,10 @@ public class ProjectParser {
             list.lookup();
 
             PrintStream stream = new PrintStream(upstream);
-            Set<Map.Entry<String, String>> entries = list.mapJiras.entrySet();
-            for (Map.Entry<String, String> entry : entries) {
-               stream.println(entry.getValue() + "=" + entry.getKey());
+            Set<Pair<String, String>> entries = list.setJiras;
+
+            for (Pair<String, String> pair : entries) {
+               stream.println(pair.getB() + "=" + pair.getA());
             }
             stream.close();
             entmqbrJIRA.setUpstream("ARTEMIS-", upstream);

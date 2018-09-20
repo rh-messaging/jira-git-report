@@ -30,11 +30,9 @@ public class ListJIRAsTest {
 
       list.lookup();
 
-      Set<Map.Entry<String, String>> entries = list.mapJiras.entrySet();
-
       System.out.println("Result::");
-      for (Map.Entry<String, String> entry : entries) {
-         System.out.println(entry.getKey() + "=" + entry.getValue());
+      for (Pair<String, String> entry: list.setJiras) {
+         System.out.println(entry.getA() + "=" + entry.getB());
       }
    }
 }

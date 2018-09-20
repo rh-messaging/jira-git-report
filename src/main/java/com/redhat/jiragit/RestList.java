@@ -21,19 +21,15 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonString;
-import javax.json.JsonValue;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
 
@@ -44,7 +40,7 @@ public class RestList {
    public String queryURL;
    public String baseURL;
 
-   public HashMap<String, String> mapJiras = new HashMap<>();
+   public Set<Pair<String, String>> setJiras = new HashSet<>();
 
    public String getJiraLookup() {
       return jira;
@@ -122,9 +118,9 @@ public class RestList {
          // System.out.println("Object: " + object + ", issues=" + issues);
 
          for (int i = 0; i < issues.size(); i++) {
-            JsonObject item = (JsonObject)issues.get(i);
+            JsonObject item = (JsonObject) issues.get(i);
 
-            JsonString jirakey = (JsonString)item.get("key");
+            JsonString jirakey = (JsonString) item.get("key");
 
             StringWriter stringWriter = new StringWriter();
             PrintWriter writer = new PrintWriter(stringWriter);
@@ -138,28 +134,26 @@ public class RestList {
                for (String jiraFound : jiras) {
                   //System.out.println("jira::" + jiraFound);
                   System.out.println(jirakey.getString() + "=" + jiraFound);
-                  mapJiras.put(jirakey.getString(), jiraFound);
+                  setJiras.add(new Pair<>(jirakey.getString(), jiraFound));
                }
             }
-
 
             System.out.println("querying links for " + jirakey.getString());
             remoteQuery(jirakey.getString(), baseURL + jirakey.getString() + "/remotelink/");
             System.out.println("querying comments for " + jirakey.getString());
             remoteQuery(jirakey.getString(), baseURL + jirakey.getString() + "/comment/");
 
-
-//
-//            JsonObject fields = item.getJsonObject("fields");
-//
-//            Iterator<Map.Entry<String, JsonValue>> iterator = fields.entrySet().iterator();
-//
-//            while (iterator.hasNext()) {
-//               Map.Entry<String, JsonValue> entry = iterator.next();
-//               System.out.println("Key::" + entry.getKey() + " == " + entry.getValue());
-//            }
-//
-//
+            //
+            //            JsonObject fields = item.getJsonObject("fields");
+            //
+            //            Iterator<Map.Entry<String, JsonValue>> iterator = fields.entrySet().iterator();
+            //
+            //            while (iterator.hasNext()) {
+            //               Map.Entry<String, JsonValue> entry = iterator.next();
+            //               System.out.println("Key::" + entry.getKey() + " == " + entry.getValue());
+            //            }
+            //
+            //
          }
 
          start = start + maxResults;
@@ -180,7 +174,8 @@ public class RestList {
          int size = inputStream.read(bytes);
          arrayOutputStream.write(bytes, 0, size);
 
-         if (size < 1024) break;
+         if (size < 1024)
+            break;
       }
 
       String result = new String(arrayOutputStream.toByteArray());
@@ -192,7 +187,7 @@ public class RestList {
          for (String jiraFound : jiras) {
             //System.out.println("jira::" + jiraFound);
             System.out.println("remote found-> " + jirakey + "=" + jiraFound);
-            mapJiras.put(jirakey, jiraFound);
+            setJiras.add(new Pair<>(jirakey, jiraFound));
          }
       }
 
