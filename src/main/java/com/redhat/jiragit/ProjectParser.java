@@ -170,7 +170,7 @@ public class ProjectParser {
    private static void amqProcess(String clone, String output, String tag1, String tag2, boolean rest, String[] otherBranches) throws Exception {
 
 
-      GitParser parser = new GitParser(new File(clone), "https://github.com/rh-messaging/activemq-artemis").
+      GitParser parser = new GitParser(new File(clone), "https://github.com/rh-messaging/activemq-artemis/").
          setSourceSuffix(".java", ".md", ".c", ".sh", ".groovy");
 
       JiraParser artemisJIRA = new JiraParser("ARTEMIS");
