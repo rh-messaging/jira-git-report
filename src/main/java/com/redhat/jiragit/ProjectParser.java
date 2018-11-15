@@ -234,7 +234,7 @@ public class ProjectParser {
          PrintStream stream = new PrintStream(upstream);
          Set<Pair<String, String>> entries = list.setJiras;
          for (Map.Entry<Object, Object> entry : originalProperties.entrySet()) {
-            entries.add(new Pair<>(entry.getKey().toString(), entry.getValue().toString()));
+            entries.add(new Pair<>(entry.getValue().toString(), entry.getKey().toString()));
          }
 
          for (Pair<String, String> pair : entries) {
