@@ -1,7 +1,7 @@
 # git-release-report
 This project is intended to help you manage your JIRAs.
 
-#The problem:
+# The problem:
 
 As I have been managing projects using JIRA, I was constantly have a few issues. For that reason I created an initial version of a report tool.
 
