@@ -134,11 +134,20 @@ public class GitParser {
       for (BranchInfo branchInfo : this.branches) {
          RevWalk walk = new RevWalk(git.getRepository());
          ObjectId fromID = git.getRepository().resolve(branchInfo.source);
+
+         if (fromID == null) {
+            throw new NullPointerException("Cannot find " + branchInfo.source);
+         }
+
          ObjectId toID = git.getRepository().resolve(branchInfo.name);
 
+         if (toID == null) {
+            throw new NullPointerException("Cannot find " + branchInfo.name);
+         }
 
-         RevCommit fromCommit = walk.parseCommit(fromID);
-         RevCommit toCommit = walk.parseCommit(toID);
+
+         RevCommit fromCommit = getBranchRef(walk, fromID);
+         RevCommit toCommit = getBranchRef(walk, toID);
          walk.markUninteresting(fromCommit);
          walk.markStart(toCommit);
 
@@ -163,6 +172,14 @@ public class GitParser {
          walk.close();
       }
 
+   }
+
+   private RevCommit getBranchRef(RevWalk walk, ObjectId toID) throws IOException {
+      try {
+         return walk.parseCommit(toID);
+      } catch (NullPointerException e) {
+         throw new NullPointerException("Cannot find " + toID);
+      }
    }
 
    public void parse(File outputFile, String from, String to) throws Exception {
