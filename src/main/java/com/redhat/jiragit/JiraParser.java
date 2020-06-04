@@ -30,9 +30,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import static com.redhat.jiragit.LinkUtility.makeALink;
 
@@ -61,7 +63,7 @@ public class JiraParser {
 
    String upstreamJIRA;
    File upstreamFile;
-   Map<String, String[]> upstreamList;
+   Map<String, Set<String>> upstreamList;
 
    final HashSet<String> totalJiras = new HashSet<>();
 
@@ -207,7 +209,7 @@ public class JiraParser {
          HashSet<String> upstreamLocalList = new HashSet();
          extractJIRAs(message, upstreamJIRA, upstreamLocalList);
          for (String upstreamItem : upstreamLocalList) {
-            String value[] = upstreamList.get(upstreamItem);
+            Set<String> value = upstreamList.get(upstreamItem);
             if (value != null) {
                for (String v : value) {
                   locallist.add(v);
@@ -258,7 +260,7 @@ public class JiraParser {
 
    }
 
-   public static HashMap<String, String[]> loadValues(File stream, boolean valueAsKey) throws Exception {
+   public static HashMap<String, Set<String>> loadValues(File stream, boolean valueAsKey) throws Exception {
 
       int keyLocation;
       int valueLocation;
@@ -271,7 +273,7 @@ public class JiraParser {
          valueLocation = 1;
       }
 
-      HashMap<String, String[]> returnValue = new HashMap<>();
+      HashMap<String, Set<String>> returnValue = new HashMap<>();
       BufferedReader inputStream = new BufferedReader(new InputStreamReader(new FileInputStream(stream)));
       while (true) {
          String line = inputStream.readLine();
@@ -281,20 +283,15 @@ public class JiraParser {
 
          String keys[] = line.split("=");
 
-         String[] value = returnValue.get(keys[0]);
+         Set<String> values = returnValue.get(keys[keyLocation]);
 
-         if (value == null) {
-            value = new String[] {keys[valueLocation]};
-         } else {
-            String[] oldValue = value;
-            value = new String[value.length + 1];
-            for (int i = 0; i < oldValue.length; i++) {
-               value[i] = oldValue[i];
-            }
-            value[value.length - 1] = keys[valueLocation];
+         if (values == null) {
+            values = new LinkedHashSet<>();
+            returnValue.put(keys[keyLocation], values);
          }
 
-         returnValue.put(keys[keyLocation], value);
+         values.add(keys[valueLocation]);
+
       }
 
       return returnValue;

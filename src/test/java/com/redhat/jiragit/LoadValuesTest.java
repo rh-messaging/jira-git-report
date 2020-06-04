@@ -20,7 +20,9 @@ package com.redhat.jiragit;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Rule;
@@ -43,17 +45,17 @@ public class LoadValuesTest {
         printStream.println("e=f");
         printStream.close();
         fileOutputStream.close();
-        Map<String, String[]> values = ProjectParser.loadValues(file);
+        Map<String, Set<String>> values = JiraParser.loadValues(file, false);
 
-        String[] valuesA = values.get("a");
-        Assert.assertEquals(3, valuesA.length);
-        Assert.assertEquals("b", valuesA[0]);
-        Assert.assertEquals("c", valuesA[1]);
-        Assert.assertEquals("d", valuesA[2]);
+        Set<String> valuesA = values.get("a");
+        Assert.assertEquals(3, valuesA.size());
+        Assert.assertTrue(valuesA.contains("b"));
+        Assert.assertTrue(valuesA.contains("c"));
+        Assert.assertTrue(valuesA.contains("d"));
 
-        String[] valuesE = values.get("e");
-        Assert.assertEquals(1, valuesE.length);
-        Assert.assertEquals("f", valuesE[0]);
+        Set<String> valuesE = values.get("e");
+        Assert.assertEquals(1, valuesE.size());
+        Assert.assertTrue(valuesE.contains("f"));
 
     }
 }
