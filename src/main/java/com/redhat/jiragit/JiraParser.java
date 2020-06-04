@@ -19,15 +19,19 @@ package com.redhat.jiragit;
 
 import javax.json.Json;
 import javax.json.JsonObject;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import static com.redhat.jiragit.LinkUtility.makeALink;
@@ -57,7 +61,7 @@ public class JiraParser {
 
    String upstreamJIRA;
    File upstreamFile;
-   Properties upstreamList;
+   Map<String, String[]> upstreamList;
 
    final HashSet<String> totalJiras = new HashSet<>();
 
@@ -192,8 +196,7 @@ public class JiraParser {
    public void setUpstream(String upstreamJIRA, File upstreamFile) throws Exception {
       this.upstreamJIRA = upstreamJIRA;
       this.upstreamFile = upstreamFile;
-      this.upstreamList = new Properties();
-      upstreamList.load(new FileInputStream(upstreamFile));
+      this.upstreamList = loadValues(upstreamFile, false);
    }
 
 
@@ -204,9 +207,11 @@ public class JiraParser {
          HashSet<String> upstreamLocalList = new HashSet();
          extractJIRAs(message, upstreamJIRA, upstreamLocalList);
          for (String upstreamItem : upstreamLocalList) {
-            String value = upstreamList.getProperty(upstreamItem);
+            String value[] = upstreamList.get(upstreamItem);
             if (value != null) {
-               locallist.add(value);
+               for (String v : value) {
+                  locallist.add(v);
+               }
             }
          }
       }
@@ -250,6 +255,49 @@ public class JiraParser {
          output.print(bufferJiras.toString());
          output.println(")'>" + totalJiras.size() + " JIRAS on " + title + "</a></h2>");
       }
+
+   }
+
+   public static HashMap<String, String[]> loadValues(File stream, boolean valueAsKey) throws Exception {
+
+      int keyLocation;
+      int valueLocation;
+
+      if (valueAsKey) {
+         keyLocation = 1;
+         valueLocation = 0;
+      } else {
+         keyLocation = 0;
+         valueLocation = 1;
+      }
+
+      HashMap<String, String[]> returnValue = new HashMap<>();
+      BufferedReader inputStream = new BufferedReader(new InputStreamReader(new FileInputStream(stream)));
+      while (true) {
+         String line = inputStream.readLine();
+         if (line == null) {
+            break;
+         }
+
+         String keys[] = line.split("=");
+
+         String[] value = returnValue.get(keys[0]);
+
+         if (value == null) {
+            value = new String[] {keys[valueLocation]};
+         } else {
+            String[] oldValue = value;
+            value = new String[value.length + 1];
+            for (int i = 0; i < oldValue.length; i++) {
+               value[i] = oldValue[i];
+            }
+            value[value.length - 1] = keys[valueLocation];
+         }
+
+         returnValue.put(keys[keyLocation], value);
+      }
+
+      return returnValue;
 
    }
 

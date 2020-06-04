@@ -17,9 +17,13 @@
 
 package com.redhat.jiragit;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -205,48 +209,28 @@ public class ProjectParser {
 
       File upstream = new File("entmqbr.properties");
 
+      if (!upstream.exists()) {
+         try {
 
-      Properties originalProperties = new Properties();
-      String maxJIRA = null;
-      if (upstream.exists()) {
-         originalProperties.load(new FileInputStream(upstream));
-         for (Map.Entry<Object, Object> entry : originalProperties.entrySet()) {
-            if (maxJIRA == null || getJIRACode(maxJIRA) < getJIRACode(entry.getValue().toString())) {
-               maxJIRA = entry.getValue().toString();
+            RestList list;
+
+            list = new RestList().setJiraLookup("ARTEMIS-").setQueryUrl("https://issues.jboss.org/rest/api/latest/search?jql=project=%22ENTMQBR%22&fields=*all&maxResults=1000").setBaseURL("https://issues.jboss.org/rest/api/latest/issue/").setUserPassProperty("ENTMQPASS");
+            list.lookup();
+
+            PrintStream stream = new PrintStream(upstream);
+            Set<Pair<String, String>> entries = list.setJiras;
+            for (Pair<String, String> pair : entries) {
+               stream.println(pair.getB() + "=" + pair.getA());
             }
+            stream.close();
+         } catch (Exception e) {
+            e.printStackTrace();
          }
       }
 
-      System.out.println("Max Value " + maxJIRA);
+      entmqbrJIRA.setUpstream("ARTEMIS-", upstream);
 
-      try {
-
-         RestList list;
-
-         if (maxJIRA == null) {
-            list = new RestList().setJiraLookup("ARTEMIS-").setQueryUrl("https://issues.jboss.org/rest/api/latest/search?jql=project=%22ENTMQBR%22&fields=*all&maxResults=5000").setBaseURL("https://issues.jboss.org/rest/api/latest/issue/").setUserPassProperty("ENTMQPASS");
-         } else {
-
-            list = new RestList().setJiraLookup("ARTEMIS-").setQueryUrl("https://issues.jboss.org/rest/api/latest/search?jql=project=%22ENTMQBR%22%20AND%20key%3E" + maxJIRA + "&fields=*all&maxResults=5000").setBaseURL("https://issues.jboss.org/rest/api/latest/issue/").setUserPassProperty("ENTMQPASS");
-         }
-         list.lookup();
-
-         PrintStream stream = new PrintStream(upstream);
-         Set<Pair<String, String>> entries = list.setJiras;
-         for (Map.Entry<Object, Object> entry : originalProperties.entrySet()) {
-            entries.add(new Pair<>(entry.getValue().toString(), entry.getKey().toString()));
-         }
-
-         for (Pair<String, String> pair : entries) {
-            stream.println(pair.getB() + "=" + pair.getA());
-         }
-         stream.close();
-         entmqbrJIRA.setUpstream("ARTEMIS-", upstream);
-      } catch (Exception e) {
-         e.printStackTrace();
-      }
-
-      originalProperties.load(new FileInputStream(upstream));
+      parser.addJIRA(entmqbrJIRA);
 
       parser.addInterestingfolder("test").addInterestingfolder("docs/").addInterestingfolder("examples/");
       File file = new File(output);
