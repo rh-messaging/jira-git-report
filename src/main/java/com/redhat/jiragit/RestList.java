@@ -138,11 +138,6 @@ public class RestList {
                }
             }
 
-            System.out.println("querying links for " + jirakey.getString());
-            remoteQuery(jirakey.getString(), baseURL + jirakey.getString() + "/remotelink/");
-            System.out.println("querying comments for " + jirakey.getString());
-            remoteQuery(jirakey.getString(), baseURL + jirakey.getString() + "/comment/");
-
             //
             //            JsonObject fields = item.getJsonObject("fields");
             //

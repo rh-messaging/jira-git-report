@@ -246,9 +246,7 @@ public class ProjectParser {
          e.printStackTrace();
       }
 
-
-
-      parser.addJIRA(entmqbrJIRA);
+      originalProperties.load(new FileInputStream(upstream));
 
       parser.addInterestingfolder("test").addInterestingfolder("docs/").addInterestingfolder("examples/");
       File file = new File(output);
