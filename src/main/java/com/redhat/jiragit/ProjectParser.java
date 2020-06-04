@@ -214,7 +214,7 @@ public class ProjectParser {
 
             RestList list;
 
-            list = new RestList().setJiraLookup("ARTEMIS-").setQueryUrl("https://issues.jboss.org/rest/api/latest/search?jql=project=%22ENTMQBR%22&fields=*all&maxResults=1000").setBaseURL("https://issues.jboss.org/rest/api/latest/issue/").setUserPassProperty("ENTMQPASS");
+            list = new RestList().setJiraLookup("ARTEMIS-").setQueryUrl("https://issues.jboss.org/rest/api/latest/search?jql=project=%22ENTMQBR%22&fields=*all&maxResults=250").setBaseURL("https://issues.jboss.org/rest/api/latest/issue/").setUserPassProperty("ENTMQPASS");
             list.lookup();
 
             PrintStream stream = new PrintStream(upstream);
