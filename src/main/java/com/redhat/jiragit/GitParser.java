@@ -287,18 +287,28 @@ public class GitParser {
             }
          }
 
+         // This will parse current jiras that I need on cherry-pick, so we do this in advance, store the variable and reuse it on printing
+         String prettyCommitMessage = prettyCommitMessage(commit.getShortMessage(), commit.getFullMessage());
+
          output.print("<tr>");
          output.println("<td>" + makeALink(numberOfCommits + "", githubURI + "commit/" + commit.getName()) + "</td>");
          output.print("<td>" + commitCell(commit) + "</td>");
 
          if (!branches.isEmpty()) {
+            if (cherryPickInfo.toString().trim().equals("")) {
+               for (JiraParser jiraParser : jiras) {
+                  if (jiraParser.isCherryPickRequired()) {
+                     cherryPickInfo.append("<p><b>Required</b></p>");
+                     break;
+                  }
+               }
+            }
             output.println("<td>" + cherryPickInfo.toString() + "</td>");
          }
          output.print("<td>" + dateFormat.format(commit.getAuthorIdent().getWhen()) + "</td>");
          output.print("<td>" + commit.getAuthorIdent().getName() + "</td>");
-         output.print("<td>" + prettyCommitMessage(commit.getShortMessage(), commit.getFullMessage()) + "</td>");
+         output.print("<td>" + prettyCommitMessage + "</td>");
 
-         StringBuffer bufferJIRA = new StringBuffer();
          for (JiraParser jiraParser : jiras) {
             output.println("<td>" + jiraParser.getJIRAStatus() + "</td>");
          }

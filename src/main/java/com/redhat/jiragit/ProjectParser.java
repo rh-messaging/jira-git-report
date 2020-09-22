@@ -56,7 +56,10 @@ public class ProjectParser {
                artemisProcess(arg[1], arg[2], arg[3], arg[4], Boolean.parseBoolean(arg[5]), otherBranches);
                break;
             case "amq":
-               amqProcess(arg[1], arg[2], arg[3], arg[4], Boolean.parseBoolean(arg[5]), otherBranches);
+               amqProcess(arg[1], arg[2], arg[3], arg[4], Boolean.parseBoolean(arg[5]), otherBranches, false);
+               break;
+            case "amqcherry":
+               amqProcess(arg[1], arg[2], arg[3], arg[4], Boolean.parseBoolean(arg[5]), otherBranches, true);
                break;
             case "wildfly":
                wildflyProcess(arg[1], arg[2], arg[3], arg[4], Boolean.parseBoolean(arg[5]), otherBranches);
@@ -179,7 +182,7 @@ public class ProjectParser {
       }
    }
 
-   private static void amqProcess(String clone, String output, String tag1, String tag2, boolean rest, String[] otherBranches) throws Exception {
+   private static void amqProcess(String clone, String output, String tag1, String tag2, boolean rest, String[] otherBranches, boolean treatCherryPick) throws Exception {
 
 
       GitParser parser = new GitParser(new File(clone), "https://github.com/rh-messaging/activemq-artemis/").
@@ -218,7 +221,7 @@ public class ProjectParser {
 
             RestList list;
 
-            list = new RestList().setJiraLookup("ARTEMIS-").addInterestLabel("NO-BACKPORT-NEEDED").setQueryUrl("https://issues.jboss.org/rest/api/latest/search?jql=project=%22ENTMQBR%22&fields=*all&maxResults=50").setBaseURL("https://issues.jboss.org/rest/api/latest/issue/").setUserPassProperty("ENTMQPASS");
+            list = new RestList().setJiraLookup("ARTEMIS-").addInterestLabel("NO-BACKPORT-NEEDED").setQueryUrl("https://issues.jboss.org/rest/api/latest/search?jql=project=%22ENTMQBR%22&fields=*all&maxResults=250").setBaseURL("https://issues.jboss.org/rest/api/latest/issue/").setUserPassProperty("ENTMQPASS");
             list.lookup();
 
             PrintStream stream = new PrintStream(upstream);
@@ -230,15 +233,9 @@ public class ProjectParser {
             stream = new PrintStream(entmqbrLabels);
             for (Map.Entry<String, Set<String>> entry : list.interestingLabels.entrySet()) {
                Iterator<String> jirasIterator = entry.getValue().iterator();
-               stream.print(entry.getKey() + "=");
                while (jirasIterator.hasNext()) {
-                  stream.print(jirasIterator.next());
-                  if (jirasIterator.hasNext()) {
-                     stream.print(",");
-                  }
+                  stream.println(jirasIterator.next() + "=" + entry.getKey());
                }
-               stream.println();
-
             }
             stream.close();
          } catch (Exception e) {
@@ -247,6 +244,7 @@ public class ProjectParser {
       }
 
       entmqbrJIRA.setUpstream("ARTEMIS-", upstream);
+      entmqbrJIRA.setLabels(entmqbrLabels).setRequireCherryPick(treatCherryPick).setLabelException("NO-BACKPORT-NEEDED");
 
       parser.addJIRA(entmqbrJIRA);
 

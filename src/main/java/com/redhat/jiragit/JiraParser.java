@@ -51,6 +51,9 @@ public class JiraParser {
 
    String restLocation;
 
+   boolean requireCherryPick;
+   String labelException;
+
    // JQL used to list all JIRAs here
    String sampleJQL;
 
@@ -64,6 +67,7 @@ public class JiraParser {
    String upstreamJIRA;
    File upstreamFile;
    Map<String, Set<String>> upstreamList;
+   Map<String, Set<String>> labelsList;
 
    final HashSet<String> totalJiras = new HashSet<>();
 
@@ -122,6 +126,43 @@ public class JiraParser {
       }
 
       return message;
+   }
+
+   public boolean isRequireCherryPick() {
+      return requireCherryPick;
+   }
+
+   public JiraParser setRequireCherryPick(boolean requireCherryPick) {
+      this.requireCherryPick = requireCherryPick;
+      return this;
+   }
+
+   public String getLabelException() {
+      return labelException;
+   }
+
+   public JiraParser setLabelException(String labelException) {
+      this.labelException = labelException;
+      return this;
+   }
+
+   boolean isCherryPickRequired() {
+      if (requireCherryPick && currentJiras != null && currentJiras.length > 0) {
+         if (labelException != null && labelsList != null) {
+            for (String jira : currentJiras) {
+               Set<String> ignoreJIRA = labelsList.get(labelException);
+               if (ignoreJIRA != null) {
+                  if (ignoreJIRA.contains(jira)) {
+                     return false;
+                  }
+               }
+            }
+         }
+
+         return true;
+      }
+
+      return false;
    }
 
 
@@ -199,6 +240,11 @@ public class JiraParser {
       this.upstreamJIRA = upstreamJIRA;
       this.upstreamFile = upstreamFile;
       this.upstreamList = loadValues(upstreamFile, false);
+   }
+
+   public JiraParser setLabels(File labelsFile) throws Exception {
+      this.labelsList = loadValues(labelsFile, true);
+      return this;
    }
 
 
@@ -289,7 +335,6 @@ public class JiraParser {
             values = new LinkedHashSet<>();
             returnValue.put(keys[keyLocation], values);
          }
-
          values.add(keys[valueLocation]);
 
       }
