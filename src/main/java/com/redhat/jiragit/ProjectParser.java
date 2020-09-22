@@ -23,10 +23,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Clebert Suconic
@@ -208,19 +205,40 @@ public class ProjectParser {
       }
 
       File upstream = new File("entmqbr.properties");
+      File entmqbrLabels = new File("entmqbr-labels.properties");
 
-      if (!upstream.exists()) {
+      if (!upstream.exists() || !entmqbrLabels.exists()) {
+         if (upstream.exists()) {
+            upstream.delete();
+         }
+         if (entmqbrLabels.exists()) {
+            entmqbrLabels.delete();
+         }
          try {
 
             RestList list;
 
-            list = new RestList().setJiraLookup("ARTEMIS-").setQueryUrl("https://issues.jboss.org/rest/api/latest/search?jql=project=%22ENTMQBR%22&fields=*all&maxResults=250").setBaseURL("https://issues.jboss.org/rest/api/latest/issue/").setUserPassProperty("ENTMQPASS");
+            list = new RestList().setJiraLookup("ARTEMIS-").addInterestLabel("NO-BACKPORT-NEEDED").setQueryUrl("https://issues.jboss.org/rest/api/latest/search?jql=project=%22ENTMQBR%22&fields=*all&maxResults=50").setBaseURL("https://issues.jboss.org/rest/api/latest/issue/").setUserPassProperty("ENTMQPASS");
             list.lookup();
 
             PrintStream stream = new PrintStream(upstream);
             Set<Pair<String, String>> entries = list.setJiras;
             for (Pair<String, String> pair : entries) {
                stream.println(pair.getB() + "=" + pair.getA());
+            }
+            stream.close();
+            stream = new PrintStream(entmqbrLabels);
+            for (Map.Entry<String, Set<String>> entry : list.interestingLabels.entrySet()) {
+               Iterator<String> jirasIterator = entry.getValue().iterator();
+               stream.print(entry.getKey() + "=");
+               while (jirasIterator.hasNext()) {
+                  stream.print(jirasIterator.next());
+                  if (jirasIterator.hasNext()) {
+                     stream.print(",");
+                  }
+               }
+               stream.println();
+
             }
             stream.close();
          } catch (Exception e) {

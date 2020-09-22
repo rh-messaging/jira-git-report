@@ -28,6 +28,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -37,6 +38,8 @@ public class RestList {
 
    public String userPassProperty;
    public String jira;
+   public HashMap<String, Set<String>> interestingLabels = new HashMap<>();
+   public String nonRequiredCherryPickLabel;
    public String queryURL;
    public String baseURL;
 
@@ -44,6 +47,11 @@ public class RestList {
 
    public String getJiraLookup() {
       return jira;
+   }
+
+   public RestList addInterestLabel(String interestedLabel) {
+      interestingLabels.put(interestedLabel, new HashSet<String>());
+      return this;
    }
 
    public RestList setJiraLookup(String jira) {
@@ -121,6 +129,24 @@ public class RestList {
             JsonObject item = (JsonObject) issues.get(i);
 
             JsonString jirakey = (JsonString) item.get("key");
+
+            JsonObject fields = (JsonObject) item.get("fields");
+
+            JsonArray labels = (JsonArray) fields.get("labels");
+
+            if (labels != null) {
+               for (int l = 0; l < labels.size(); l++) {
+                  String labelUsed = labels.getString(l, null);
+                  if (labelUsed != null) {
+                     Set<String> jirasOnLabel = interestingLabels.get(labelUsed);
+
+                     if (jirasOnLabel != null) {
+                        System.out.println("JIRA " + jirakey.getString() + " contains the label " + labelUsed);
+                        jirasOnLabel.add(jirakey.getString());
+                     }
+                  }
+               }
+            }
 
             StringWriter stringWriter = new StringWriter();
             PrintWriter writer = new PrintWriter(stringWriter);
