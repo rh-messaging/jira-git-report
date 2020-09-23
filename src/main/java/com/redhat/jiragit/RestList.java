@@ -104,7 +104,15 @@ public class RestList {
       return urlConnection.getInputStream();
    }
 
+   public interface RestIntercept {
+      public void intercept(JsonObject jira, JsonString jirakey, JsonObject fields);
+   }
+
    public void lookup() throws Exception {
+      lookup(null);
+   }
+
+   public void lookup(RestIntercept intercept) throws Exception {
       int start = 0;
       int total = 0;
 
@@ -132,6 +140,10 @@ public class RestList {
 
             JsonObject fields = (JsonObject) item.get("fields");
 
+            if (intercept != null) {
+               intercept.intercept(item, jirakey, fields);
+            }
+
             JsonArray labels = (JsonArray) fields.get("labels");
 
             if (labels != null) {
@@ -141,7 +153,6 @@ public class RestList {
                      Set<String> jirasOnLabel = interestingLabels.get(labelUsed);
 
                      if (jirasOnLabel != null) {
-                        System.out.println("JIRA " + jirakey.getString() + " contains the label " + labelUsed);
                         jirasOnLabel.add(jirakey.getString());
                      }
                   }
@@ -156,25 +167,11 @@ public class RestList {
             JiraParser.extractJIRAs(stringWriter.toString(), jira, jiras);
 
             if (!jiras.isEmpty()) {
-               //System.out.println("Found " + jiras.size());
                for (String jiraFound : jiras) {
-                  //System.out.println("jira::" + jiraFound);
                   System.out.println(jirakey.getString() + "=" + jiraFound);
                   setJiras.add(new Pair<>(jirakey.getString(), jiraFound));
                }
             }
-
-            //
-            //            JsonObject fields = item.getJsonObject("fields");
-            //
-            //            Iterator<Map.Entry<String, JsonValue>> iterator = fields.entrySet().iterator();
-            //
-            //            while (iterator.hasNext()) {
-            //               Map.Entry<String, JsonValue> entry = iterator.next();
-            //               System.out.println("Key::" + entry.getKey() + " == " + entry.getValue());
-            //            }
-            //
-            //
          }
 
          start = start + maxResults;

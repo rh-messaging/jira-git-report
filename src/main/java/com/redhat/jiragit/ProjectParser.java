@@ -17,6 +17,8 @@
 
 package com.redhat.jiragit;
 
+import javax.json.JsonObject;
+import javax.json.JsonString;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -219,10 +221,18 @@ public class ProjectParser {
          }
          try {
 
-            RestList list;
-
-            list = new RestList().setJiraLookup("ARTEMIS-").addInterestLabel("NO-BACKPORT-NEEDED").setQueryUrl("https://issues.jboss.org/rest/api/latest/search?jql=project=%22ENTMQBR%22&fields=*all&maxResults=250").setBaseURL("https://issues.jboss.org/rest/api/latest/issue/").setUserPassProperty("ENTMQPASS");
-            list.lookup();
+            final RestList list = new RestList().setJiraLookup("ARTEMIS-").addInterestLabel("NO-BACKPORT-NEEDED").setQueryUrl("https://issues.jboss.org/rest/api/latest/search?jql=project=%22ENTMQBR%22&fields=*all&maxResults=250").setBaseURL("https://issues.jboss.org/rest/api/latest/issue/").setUserPassProperty("ENTMQPASS");
+            list.lookup(new RestList.RestIntercept() {
+               @Override
+               // if the issue is not a bug, we will infer the NO-BACKPORT-NEEDED
+               public void intercept(JsonObject jira, JsonString jirakey, JsonObject fields) {
+                  JsonObject issueType = (JsonObject)fields.get("issuetype");
+                  JsonString issueTypeName = issueType.getJsonString("name");
+                  if (!issueTypeName.getString().equals("Bug")) {
+                     list.interestingLabels.get("NO-BACKPORT-NEEDED").add(jirakey.getString());
+                  }
+               }
+            });
 
             PrintStream stream = new PrintStream(upstream);
             Set<Pair<String, String>> entries = list.setJiras;
