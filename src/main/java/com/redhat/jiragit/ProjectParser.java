@@ -221,7 +221,7 @@ public class ProjectParser {
          }
          try {
 
-            final RestList list = new RestList().setJiraLookup("ARTEMIS-").addInterestLabel("NO-BACKPORT-NEEDED").setQueryUrl("https://issues.jboss.org/rest/api/latest/search?jql=project=%22ENTMQBR%22&fields=*all&maxResults=250").setBaseURL("https://issues.jboss.org/rest/api/latest/issue/").setUserPassProperty("ENTMQPASS");
+            final RestList list = new RestList().setJiraLookup("ARTEMIS-").addInterestLabel("NO-BACKPORT-NEEDED").addInterestLabel("pr-sent").setQueryUrl("https://issues.jboss.org/rest/api/latest/search?jql=project=%22ENTMQBR%22&fields=*all&maxResults=250").setBaseURL("https://issues.jboss.org/rest/api/latest/issue/").setUserPassProperty("ENTMQPASS");
             list.lookup(new RestList.RestIntercept() {
                @Override
                // if the issue is not a bug, we will infer the NO-BACKPORT-NEEDED
@@ -254,7 +254,7 @@ public class ProjectParser {
       }
 
       entmqbrJIRA.setUpstream("ARTEMIS-", upstream);
-      entmqbrJIRA.setLabels(entmqbrLabels).setRequireCherryPick(treatCherryPick).setLabelException("NO-BACKPORT-NEEDED");
+      entmqbrJIRA.setLabels(entmqbrLabels).setRequireCherryPick(treatCherryPick).setLabelException("NO-BACKPORT-NEEDED").setLabelPRSent("pr-sent");
 
       parser.addJIRA(entmqbrJIRA);
 

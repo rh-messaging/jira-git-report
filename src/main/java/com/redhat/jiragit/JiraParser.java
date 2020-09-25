@@ -54,6 +54,8 @@ public class JiraParser {
    boolean requireCherryPick;
    String labelException;
 
+   String labelPRSent;
+
    // JQL used to list all JIRAs here
    String sampleJQL;
 
@@ -144,6 +146,30 @@ public class JiraParser {
    public JiraParser setLabelException(String labelException) {
       this.labelException = labelException;
       return this;
+   }
+
+   public String getLabelPRSent() {
+      return labelPRSent;
+   }
+
+   public JiraParser setLabelPRSent(String labelPRSent) {
+      this.labelPRSent = labelPRSent;
+      return this;
+   }
+
+   public boolean isPRSent() {
+      if (labelPRSent != null && currentJiras != null && currentJiras.length > 0) {
+         for (String jira : currentJiras) {
+            Set<String> prSent = labelsList.get(labelPRSent);
+            if (prSent != null) {
+               if (prSent.contains(jira)) {
+                  return true;
+               }
+            }
+         }
+      }
+
+      return false;
    }
 
    boolean isCherryPickRequired() {

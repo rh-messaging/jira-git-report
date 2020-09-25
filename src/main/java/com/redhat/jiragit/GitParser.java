@@ -298,7 +298,11 @@ public class GitParser {
             if (cherryPickInfo.toString().trim().equals("")) {
                for (JiraParser jiraParser : jiras) {
                   if (jiraParser.isCherryPickRequired()) {
-                     cherryPickInfo.append("<p><b>Required</b></p>");
+                     if (jiraParser.isPRSent()) {
+                        cherryPickInfo.append("<p><b>PR Sent</b></p>");
+                     } else {
+                        cherryPickInfo.append("<p><b>Required</b></p>");
+                     }
                      break;
                   }
                }
