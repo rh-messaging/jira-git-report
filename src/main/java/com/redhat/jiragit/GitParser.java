@@ -298,12 +298,24 @@ public class GitParser {
             if (cherryPickInfo.toString().trim().equals("")) {
                for (JiraParser jiraParser : jiras) {
                   if (jiraParser.isCherryPickRequired()) {
-                     if (jiraParser.isPRSent()) {
-                        cherryPickInfo.append("<p><b>PR Sent</b></p>");
+                     String prInfo = jiraParser.getPR();
+                     if (prInfo != null) {
+                        cherryPickInfo.append("<p><b>Required</b></p><p>PRs:" + prInfo + "</p>");
                      } else {
-                        cherryPickInfo.append("<p><b>Required</b></p>");
+                        if (jiraParser.isPRSent()) {
+                           cherryPickInfo.append("<p><b>Required</b></p><p><b>PR Sent</b></p>");
+                        } else {
+                           cherryPickInfo.append("<p><b>Required</b></p>");
+                        }
                      }
                      break;
+                  }
+               }
+            } else {
+               for (JiraParser jiraParser : jiras) {
+                  String prInfo = jiraParser.getPR();
+                  if (prInfo != null) {
+                     cherryPickInfo.append("<p> PRs:" + prInfo + "</p>");
                   }
                }
             }

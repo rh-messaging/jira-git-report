@@ -17,8 +17,10 @@
 
 package com.redhat.jiragit;
 
+import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonString;
+import javax.json.JsonValue;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -211,15 +213,21 @@ public class ProjectParser {
 
       File upstream = new File("entmqbr.properties");
       File entmqbrLabels = new File("entmqbr-labels.properties");
+      File entmqbrPRs = new File("entmqbr-PRs.properties");
 
-      if (!upstream.exists() || !entmqbrLabels.exists()) {
+      if (!upstream.exists() || !entmqbrLabels.exists() || !entmqbrPRs.exists()) {
          if (upstream.exists()) {
             upstream.delete();
+         }
+         if (entmqbrPRs.exists()) {
+            entmqbrPRs.delete();
          }
          if (entmqbrLabels.exists()) {
             entmqbrLabels.delete();
          }
          try {
+
+            final PrintStream pullRequestsStream = new PrintStream(entmqbrPRs);
 
             final RestList list = new RestList().setJiraLookup("ARTEMIS-").addInterestLabel("NO-BACKPORT-NEEDED").addInterestLabel("pr-sent").setQueryUrl("https://issues.jboss.org/rest/api/latest/search?jql=project=%22ENTMQBR%22&fields=*all&maxResults=250").setBaseURL("https://issues.jboss.org/rest/api/latest/issue/").setUserPassProperty("ENTMQPASS");
             list.lookup(new RestList.RestIntercept() {
@@ -230,6 +238,13 @@ public class ProjectParser {
                   JsonString issueTypeName = issueType.getJsonString("name");
                   if (!issueTypeName.getString().equals("Bug")) {
                      list.interestingLabels.get("NO-BACKPORT-NEEDED").add(jirakey.getString());
+                  }
+                  JsonValue githubPR = fields.get("customfield_12310220");
+                  if (githubPR != null && githubPR instanceof JsonArray) {
+                     JsonArray githubPRArray = (JsonArray)githubPR;
+                     for (int i = 0; i < githubPRArray.size(); i++) {
+                        pullRequestsStream.println(jirakey.getString() + "=" + githubPRArray.getString(i));
+                     }
                   }
                }
             });
@@ -255,6 +270,7 @@ public class ProjectParser {
 
       entmqbrJIRA.setUpstream("ARTEMIS-", upstream);
       entmqbrJIRA.setLabels(entmqbrLabels).setRequireCherryPick(treatCherryPick).setLabelException("NO-BACKPORT-NEEDED").setLabelPRSent("pr-sent");
+      entmqbrJIRA.setPRs(entmqbrPRs);
 
       parser.addJIRA(entmqbrJIRA);
 

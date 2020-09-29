@@ -70,6 +70,7 @@ public class JiraParser {
    File upstreamFile;
    Map<String, Set<String>> upstreamList;
    Map<String, Set<String>> labelsList;
+   Map<String, Set<String>> pullRequests;
 
    final HashSet<String> totalJiras = new HashSet<>();
 
@@ -172,6 +173,29 @@ public class JiraParser {
       return false;
    }
 
+   public String getPR() {
+      StringBuffer buffer = null;
+      char prInfo = 'A';
+      if (currentJiras != null && pullRequests != null) {
+         for (String jira : currentJiras) {
+            Set<String> prs = pullRequests.get(jira);
+            if (prs != null) {
+               for (String pr : prs) {
+                  if (buffer == null) {
+                     buffer = new StringBuffer();
+                  }
+                  buffer.append("<a href='" + pr + "'>" + (prInfo++) + "</a> ");
+               }
+            }
+         }
+      }
+      if (buffer == null) {
+         return null;
+      } else {
+         return buffer.toString();
+      }
+   }
+
    boolean isCherryPickRequired() {
       if (requireCherryPick && currentJiras != null && currentJiras.length > 0) {
          if (labelException != null && labelsList != null) {
@@ -270,6 +294,11 @@ public class JiraParser {
 
    public JiraParser setLabels(File labelsFile) throws Exception {
       this.labelsList = loadValues(labelsFile, true);
+      return this;
+   }
+
+   public JiraParser setPRs(File pullRequestsFile) throws Exception {
+      this.pullRequests = loadValues(pullRequestsFile, false);
       return this;
    }
 
