@@ -309,6 +309,11 @@ public class GitParser {
                         }
                      }
                      break;
+                  } else {
+                     String prInfo = jiraParser.getPR();
+                     if (prInfo != null) {
+                        cherryPickInfo.append("<p>PRs:" + prInfo + "</p>");
+                     }
                   }
                }
             } else {
