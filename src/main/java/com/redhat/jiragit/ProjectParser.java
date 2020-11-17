@@ -88,7 +88,7 @@ public class ProjectParser {
 
    private static void printSyntax() {
       System.err.println("use Parser <project> <repository> <reportOutput> <from> <to> <rest : true|false> cherry-pick-branch1 cherry-pick-source1 cherry-pick-branch2 cherry-pick-source2...cherry-pickbranchN cherry-pick-sourceN");
-      System.err.println("    valid projects: artemis, amq, wildfly, qpid-jms, qpid-dispatch");
+      System.err.println("    valid projects: artemis, amq, amqcherry, wildfly, qpid-jms, qpid-dispatch");
    }
 
    private static void wildflyProcess(String clone, String output, String tag1, String tag2, boolean rest, String[] otherBranches) throws Exception {
