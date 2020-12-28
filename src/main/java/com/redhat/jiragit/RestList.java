@@ -27,12 +27,16 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.http.HttpHeaders;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 
 public class RestList {
 
@@ -87,7 +91,7 @@ public class RestList {
    }
 
    public InputStream openStream(URL url) throws Exception {
-      URLConnection urlConnection = url.openConnection();
+      HttpGet request = new HttpGet(url.toURI());
 
       // userPass should be user:password
       String userPass = System.getProperty(userPassProperty);
@@ -97,11 +101,11 @@ public class RestList {
          System.out.println("Using user/pass");
          String authString = userPass;
          String authStringEnc = new String(Base64.encodeBase64(userPass.getBytes()));
-         urlConnection.setRequestProperty("Authorization", "Basic " + authStringEnc);
+         request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + authStringEnc);
 
       }
 
-      return urlConnection.getInputStream();
+      return HttpClients.createDefault().execute(request).getEntity().getContent();
    }
 
    public interface RestIntercept {
