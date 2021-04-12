@@ -94,11 +94,11 @@ public class ProjectParser {
    private static void wildflyProcess(String clone, String output, String tag1, String tag2, boolean rest, String[] otherBranches) throws Exception {
 
       JiraParser jiraParser = new JiraParser("WildFly JIRAs");
-      jiraParser.setJira("WFLY-").setJiraBrowseURI("https://issues.jboss.org/browse/").
-         setSampleJQL("https://issues.jboss.org/issues/?jql=project%20%3D%20WildFly%20AND%20KEY%20IN");
+      jiraParser.setJira("WFLY-").setJiraBrowseURI("https://issues.redhat.com/browse/").
+         setSampleJQL("https://issues.redhat.com/issues/?jql=project%20%3D%20WildFly%20AND%20KEY%20IN");
 
       if (rest) {
-         jiraParser.setRestLocation("https://issues.jboss.org/rest/api/2/issue/");
+         jiraParser.setRestLocation("https://issues.redhat.com/rest/api/2/issue/");
       }
 
       GitParser parser = new GitParser(new File(clone), "https://github.com/wildfly/wildfly/").
@@ -204,11 +204,11 @@ public class ProjectParser {
       parser.addBranches(otherBranches);
 
       JiraParser entmqbrJIRA = new JiraParser("ENTMQBR");
-      entmqbrJIRA.setJira("ENTMQBR-").setJiraBrowseURI("https://issues.jboss.org/jira/browse/").
-         setSampleJQL("https://issues.jboss.org/issues/?jql=project%20%3D%20ENTMQBR%20AND%20KEY%20IN");
+      entmqbrJIRA.setJira("ENTMQBR-").setJiraBrowseURI("https://issues.redhat.com/jira/browse/").
+         setSampleJQL("https://issues.redhat.com/issues/?jql=project%20%3D%20ENTMQBR%20AND%20KEY%20IN");
 
       if (rest) {
-         entmqbrJIRA.setRestLocation("https://issues.jboss.org/rest/api/2/issue/");
+         entmqbrJIRA.setRestLocation("https://issues.redhat.com/rest/api/2/issue/");
       }
 
       File upstream = new File("entmqbr.properties");
@@ -229,7 +229,7 @@ public class ProjectParser {
 
             final PrintStream pullRequestsStream = new PrintStream(entmqbrPRs);
 
-            final RestList list = new RestList().setJiraLookup("ARTEMIS-").addInterestLabel("NO-BACKPORT-NEEDED").addInterestLabel("pr-sent").setQueryUrl("https://issues.jboss.org/rest/api/latest/search?jql=project=%22ENTMQBR%22&fields=*all&maxResults=250").setBaseURL("https://issues.jboss.org/rest/api/latest/issue/").setUserPassProperty("ENTMQPASS");
+            final RestList list = new RestList().setJiraLookup("ARTEMIS-").addInterestLabel("NO-BACKPORT-NEEDED").addInterestLabel("pr-sent").setQueryUrl("https://issues.redhat.com/rest/api/latest/search?jql=project=%22ENTMQBR%22&fields=*all&maxResults=250").setBaseURL("https://issues.redhat.com/rest/api/latest/issue/").setUserPassProperty("ENTMQPASS");
             list.lookup(new RestList.RestIntercept() {
                @Override
                // if the issue is not a bug, we will infer the NO-BACKPORT-NEEDED
