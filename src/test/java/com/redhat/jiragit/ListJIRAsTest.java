@@ -26,7 +26,7 @@ public class ListJIRAsTest {
 
    @Test
    public void doList() throws Exception {
-      RestList list = new RestList().setJiraLookup("ARTEMIS-").setQueryUrl("https://issues.jboss.org/rest/api/latest/search?jql=project=%22ENTMQBR%22&fields=*all&maxResults=1000").setBaseURL("https://issues.jboss.org/rest/api/latest/issue/").setUserPassProperty("USERPASS");
+      RestList list = new RestList().setJiraLookup("ARTEMIS-").setQueryUrl("https://issues.redhat.com/rest/api/latest/search?jql=project=%22ENTMQBR%22&fields=*all&maxResults=1000").setBaseURL("https://issues.redhat.com/rest/api/latest/issue/").setUserPassProperty("USERPASS");
 
       list.lookup();
 
