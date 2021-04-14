@@ -204,7 +204,7 @@ public class ProjectParser {
       parser.addBranches(otherBranches);
 
       JiraParser entmqbrJIRA = new JiraParser("ENTMQBR");
-      entmqbrJIRA.setJira("ENTMQBR-").setJiraBrowseURI("https://issues.redhat.com/jira/browse/").
+      entmqbrJIRA.setJira("ENTMQBR-").setJiraBrowseURI("https://issues.redhat.com/browse/").
          setSampleJQL("https://issues.redhat.com/issues/?jql=project%20%3D%20ENTMQBR%20AND%20KEY%20IN");
 
       if (rest) {
