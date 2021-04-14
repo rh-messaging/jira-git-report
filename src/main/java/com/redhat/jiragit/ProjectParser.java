@@ -159,7 +159,7 @@ public class ProjectParser {
    private static void qpidDispatchProcess(String clone, String output, String tag1, String tag2, boolean rest, String[] otherBranches) throws Exception {
 
       JiraParser jiraParser = new JiraParser("Dispatch JIRAs");
-      jiraParser.setJira("DISPATCH-").setJiraBrowseURI("https://issues.apache.org/jira/browse/").
+      jiraParser.setJira("DISPATCH-").setJiraBrowseURI("https://issues.apache.org/browse/").
          setSampleJQL("https://issues.apache.org/jira/issues/?jql=project%20%3D%20DISPATCH%20AND%20key%20in%20");
 
       if (rest) {
