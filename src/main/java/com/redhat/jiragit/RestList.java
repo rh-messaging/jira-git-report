@@ -36,8 +36,8 @@ import org.apache.commons.codec.binary.Base64;
 
 public class RestList {
 
-   public String userPassProperty;
    public String jira;
+   public String authStringProperty;
    public HashMap<String, Set<String>> interestingLabels = new HashMap<>();
    public String nonRequiredCherryPickLabel;
    public String queryURL;
@@ -59,12 +59,12 @@ public class RestList {
       return this;
    }
 
-   public String getUserPassProperty() {
-      return userPassProperty;
+   public String getAuthStringProperty() {
+      return authStringProperty;
    }
 
-   public RestList setUserPassProperty(String userPassProperty) {
-      this.userPassProperty = userPassProperty;
+   public RestList setAuthStringProperty(String authStringProperty) {
+      this.authStringProperty = authStringProperty;
       return this;
    }
 
@@ -89,16 +89,13 @@ public class RestList {
    public InputStream openStream(URL url) throws Exception {
       URLConnection urlConnection = url.openConnection();
 
-      // userPass should be user:password
-      String userPass = System.getProperty(userPassProperty);
+      String authString = System.getProperty(authStringProperty);
 
-      if (userPass != null) {
+      System.out.println("URL: " + url);
 
-         System.out.println("Using user/pass");
-         String authString = userPass;
-         String authStringEnc = new String(Base64.encodeBase64(userPass.getBytes()));
-         urlConnection.setRequestProperty("Authorization", "Basic " + authStringEnc);
-
+      if (authString != null) {
+         System.out.println("AuthStringProperty: " + authStringProperty);
+         urlConnection.setRequestProperty("Authorization", authString);
       }
 
       return urlConnection.getInputStream();
