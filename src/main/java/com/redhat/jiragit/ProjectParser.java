@@ -229,7 +229,7 @@ public class ProjectParser {
 
             final PrintStream pullRequestsStream = new PrintStream(entmqbrPRs);
 
-            final RestList list = new RestList().setJiraLookup("ARTEMIS-").addInterestLabel("NO-BACKPORT-NEEDED").addInterestLabel("pr-sent").setQueryUrl("https://issues.redhat.com/rest/api/latest/search?jql=project=%22ENTMQBR%22&fields=*all&maxResults=250").setBaseURL("https://issues.redhat.com/rest/api/latest/issue/").setUserPassProperty("ENTMQPASS");
+            final RestList list = new RestList().setJiraLookup("ARTEMIS-").addInterestLabel("NO-BACKPORT-NEEDED").addInterestLabel("pr-sent").setQueryUrl("https://issues.redhat.com/rest/api/latest/search?jql=project=%22ENTMQBR%22&fields=*all&maxResults=250").setBaseURL("https://issues.redhat.com/rest/api/latest/issue/").setAuthStringProperty("RH_AUTH_STRING");
             list.lookup(new RestList.RestIntercept() {
                @Override
                // if the issue is not a bug, we will infer the NO-BACKPORT-NEEDED
