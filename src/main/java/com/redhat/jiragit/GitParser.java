@@ -183,6 +183,10 @@ public class GitParser {
    }
 
    public void parse(File outputFile, String from, String to) throws Exception {
+      parse(outputFile, from, to, false);
+   }
+
+   public void parse(File outputFile, String from, String to, boolean forActiveMQWeb) throws Exception {
 
       PrintStream output = new PrintStream(new FileOutputStream(outputFile));
 
@@ -221,7 +225,11 @@ public class GitParser {
       CanonicalTreeParser oldTreeIter = new CanonicalTreeParser();
       CanonicalTreeParser newTreeIter = new CanonicalTreeParser();
 
-      output.println(readString("header.txt"));
+      String headerFileName = "header.txt";
+      if (forActiveMQWeb) {
+         headerFileName = "header-activemqweb.txt";
+      }
+      output.println(readString(headerFileName));
 
       output.println("<body>");
 
