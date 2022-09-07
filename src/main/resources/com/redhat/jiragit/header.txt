@@ -4,13 +4,13 @@
     <!-- taken from https://assets-cdn.github.com/assets/frameworks-592c4aa40e940d1b0607a3cf272916ff.css -->
     <link type="text/css" rel="stylesheet" href="styles/framework.css"/>
 
-    <!-- taken from http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js -->
+    <!-- taken from https://code.jquery.com/jquery-3.6.1.min.js -->
     <script src="styles/jquery.min.js"></script>
 
-    <!-- taken from https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css -->
+    <!-- taken from http://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css -->
     <link rel="stylesheet" type="text/css" href="styles/jquery.dataTables.min.css">
 
-    <!-- taken from https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js -->
+    <!-- taken from http://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js -->
     <script type="text/javascript" charset="utf8" src="styles/jquery.dataTables.min.js"></script>
 
    <script type="text/javascript" class="init">
