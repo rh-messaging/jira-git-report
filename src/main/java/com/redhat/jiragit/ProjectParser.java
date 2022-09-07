@@ -21,19 +21,19 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonString;
 import javax.json.JsonValue;
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.util.*;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Clebert Suconic
  */
 
 public class ProjectParser {
+
+   private static final int REQUIRED_PARAMETER_COUNT = 7;
 
    public static void main(String arg[]) {
       try {
@@ -57,7 +57,10 @@ public class ProjectParser {
          }
          switch (arg[0]) {
             case "artemis":
-               artemisProcess(arg[1], arg[2], arg[3], arg[4], Boolean.parseBoolean(arg[5]), otherBranches);
+               artemisProcess(arg[1], arg[2], arg[3], arg[4], Boolean.parseBoolean(arg[5]), otherBranches, "header.txt");
+               break;
+            case "artemis-web":
+               artemisProcess(arg[1], arg[2], arg[3], arg[4], Boolean.parseBoolean(arg[5]), otherBranches, "header-activemqweb.txt");
                break;
             case "amq":
                amqProcess(arg[1], arg[2], arg[3], arg[4], Boolean.parseBoolean(arg[5]), otherBranches, false);
@@ -88,7 +91,7 @@ public class ProjectParser {
 
    private static void printSyntax() {
       System.err.println("use Parser <project> <repository> <reportOutput> <from> <to> <rest : true|false> cherry-pick-branch1 cherry-pick-source1 cherry-pick-branch2 cherry-pick-source2...cherry-pickbranchN cherry-pick-sourceN");
-      System.err.println("    valid projects: artemis, amq, amqcherry, wildfly, qpid-jms, qpid-dispatch");
+      System.err.println("    valid projects: artemis, artemis-web, amq, amqcherry, wildfly, qpid-jms, qpid-dispatch");
    }
 
    private static void wildflyProcess(String clone, String output, String tag1, String tag2, boolean rest, String[] otherBranches) throws Exception {
@@ -112,7 +115,7 @@ public class ProjectParser {
 
    }
 
-   private static void artemisProcess(String clone, String output, String tag1, String tag2, boolean rest, String[] otherBranches) throws Exception {
+   private static void artemisProcess(String clone, String output, String tag1, String tag2, boolean rest, String[] otherBranches, String headerFile) throws Exception {
 
 
       JiraParser jiraParser = new JiraParser("ARTEMIS JIRAs");
@@ -132,7 +135,7 @@ public class ProjectParser {
 
       parser.addInterestingfolder("test").addInterestingfolder("docs/").addInterestingfolder("examples/");
       File file = new File(output);
-      parser.parse(file,tag1, tag2);
+      parser.parse(file,tag1, tag2, headerFile);
    }
 
    private static void qpidJMSProcess(String clone, String output, String tag1, String tag2, boolean rest, String[] otherBranches) throws Exception {
@@ -276,6 +279,6 @@ public class ProjectParser {
 
       parser.addInterestingfolder("test").addInterestingfolder("docs/").addInterestingfolder("examples/");
       File file = new File(output);
-      parser.parse(file,tag1, tag2);
+      parser.parse(file, tag1, tag2);
    }
 }

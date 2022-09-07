@@ -183,6 +183,10 @@ public class GitParser {
    }
 
    public void parse(File outputFile, String from, String to) throws Exception {
+      parse(outputFile, from, to, "header.txt");
+   }
+
+   public void parse(File outputFile, String from, String to, String headerFileName) throws Exception {
 
       PrintStream output = new PrintStream(new FileOutputStream(outputFile));
 
@@ -221,7 +225,7 @@ public class GitParser {
       CanonicalTreeParser oldTreeIter = new CanonicalTreeParser();
       CanonicalTreeParser newTreeIter = new CanonicalTreeParser();
 
-      output.println(readString("header.txt"));
+      output.println(readString(headerFileName));
 
       output.println("<body>");
 
