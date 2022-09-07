@@ -16,11 +16,6 @@ ratReport.txt
 **/derby.log
 examples/**/readme.html
 
-# for native build
-CMakeCache.txt
-CMakeFiles/
-Makefile
-cmake_install.cmake
 
 # this file is generated
 artemis-native/src/main/c/org_apache_activemq_artemis_jlibaio_LibaioContext.h
@@ -34,3 +29,5 @@ docs/hacking-guide/en/_book
 
 # overlay outpit
 **/overlays/**/*
+
+**/.DS_Store
