@@ -32,8 +32,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.codec.binary.Base64;
-
 public class RestList {
 
    public String jira;
