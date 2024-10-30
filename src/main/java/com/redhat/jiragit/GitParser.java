@@ -49,6 +49,9 @@ import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
 
 import static com.redhat.jiragit.LinkUtility.makeALink;
+import static com.redhat.jiragit.ProjectParser.HEADER_TXT;
+import static com.redhat.jiragit.ProjectParser.HEADER_ACTIVEMQWEB_TXT;
+
 /**
  * @author Clebert Suconic
  */
@@ -183,20 +186,23 @@ public class GitParser {
    }
 
    public void parse(File outputFile, String from, String to) throws Exception {
-      parse(outputFile, from, to, "header.txt");
+      parse(outputFile, from, to, HEADER_TXT);
    }
 
    public void parse(File outputFile, String from, String to, String headerFileName) throws Exception {
 
       PrintStream output = new PrintStream(new FileOutputStream(outputFile));
 
-      File styleDirectory = new File(outputFile.getParent(), "styles");
-      File imageDirectory = new File(outputFile.getParent(), "images");
+      if(!HEADER_ACTIVEMQWEB_TXT.equals(headerFileName)) {
+         File styleDirectory = new File(outputFile.getParent(), "styles");
 
-      copy("framework.css", styleDirectory);
-      copy("jquery.dataTables.min.css", styleDirectory);
-      copy("jquery.dataTables.min.js", styleDirectory);
-      copy("jquery.min.js", styleDirectory);
+         copy("framework.css", styleDirectory);
+         copy("jquery.dataTables.min.css", styleDirectory);
+         copy("jquery.dataTables.min.js", styleDirectory);
+         copy("jquery.min.js", styleDirectory);
+      }
+
+      File imageDirectory = new File(outputFile.getParent(), "images");
 
       copy("sort_both.png", imageDirectory);
       copy("sort_asc.png", imageDirectory);

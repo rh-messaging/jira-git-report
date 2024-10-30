@@ -33,7 +33,8 @@ import java.util.Set;
 
 public class ProjectParser {
 
-   private static final int REQUIRED_PARAMETER_COUNT = 7;
+   public static final String HEADER_TXT = "header.txt";
+   public static final String HEADER_ACTIVEMQWEB_TXT  = "header-activemqweb.txt";
 
    public static void main(String arg[]) {
       try {
@@ -57,10 +58,10 @@ public class ProjectParser {
          }
          switch (arg[0]) {
             case "artemis":
-               artemisProcess(arg[1], arg[2], arg[3], arg[4], Boolean.parseBoolean(arg[5]), otherBranches, "header.txt");
+               artemisProcess(arg[1], arg[2], arg[3], arg[4], Boolean.parseBoolean(arg[5]), otherBranches, HEADER_TXT);
                break;
             case "artemis-web":
-               artemisProcess(arg[1], arg[2], arg[3], arg[4], Boolean.parseBoolean(arg[5]), otherBranches, "header-activemqweb.txt");
+               artemisProcess(arg[1], arg[2], arg[3], arg[4], Boolean.parseBoolean(arg[5]), otherBranches, HEADER_ACTIVEMQWEB_TXT);
                break;
             case "amq":
                amqProcess(arg[1], arg[2], arg[3], arg[4], Boolean.parseBoolean(arg[5]), otherBranches, false);
