@@ -202,11 +202,6 @@ public class GitParser {
          copy("jquery.min.js", styleDirectory);
       }
 
-      File imageDirectory = new File(outputFile.getParent(), "images");
-
-      copy("sort_both.png", imageDirectory);
-      copy("sort_asc.png", imageDirectory);
-      copy("sort_desc.png", imageDirectory);
       Git git = Git.open(folder);
       RevWalk walk = new RevWalk(git.getRepository());
 
