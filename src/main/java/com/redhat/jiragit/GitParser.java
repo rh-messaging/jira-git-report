@@ -196,7 +196,6 @@ public class GitParser {
       if(!HEADER_ACTIVEMQWEB_TXT.equals(headerFileName)) {
          File styleDirectory = new File(outputFile.getParent(), "styles");
 
-         copy("framework.css", styleDirectory);
          copy("jquery.dataTables.min.css", styleDirectory);
          copy("jquery.dataTables.min.js", styleDirectory);
          copy("jquery.min.js", styleDirectory);
